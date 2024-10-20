@@ -119,17 +119,30 @@ class _BodyMetricsState extends State<BodyMetrics> {
                   return Expanded(
                     child: Column(
                       children: [
-                        Container(
-                          width: MediaQuery.of(context).size.width * 0.9,
-                          decoration: BoxDecoration(
-                              color: Colors.green.shade300,
-                              borderRadius: BorderRadius.circular(5)),
-                          margin: const EdgeInsets.all(5),
-                          padding: const EdgeInsets.all(5),
-                          height: 40,
-                          child: Text(
-                            "Total del mes: ${_totoalMonth(state.totalSales)}",
-                            style: const TextStyle(fontSize: 20),
+                        // Container(
+                        //   width: MediaQuery.of(context).size.width * 0.9,
+                        //   decoration: BoxDecoration(
+                        //       color: Colors.green.shade300,
+                        //       borderRadius: BorderRadius.circular(5)),
+                        //   margin: const EdgeInsets.all(5),
+                        //   padding: const EdgeInsets.all(5),
+                        //   height: 40,
+                        //   child: Text(
+                        //     "Total del mes: ${_totoalMonth(state.totalSales)}",
+                        //     style: const TextStyle(fontSize: 20),
+                        //   ),
+                        // ),
+                        Card(
+                          color: Colors.green.shade100,
+                          child: SizedBox(
+                            width: MediaQuery.of(context).size.width * 0.9,
+                            height: 40,
+                            child: Center(
+                              child: Text(
+                                "Total del mes: ${_totoalMonth(state.totalSales)}",
+                                style: const TextStyle(fontSize: 20),
+                              ),
+                            ),
                           ),
                         ),
                         Expanded(

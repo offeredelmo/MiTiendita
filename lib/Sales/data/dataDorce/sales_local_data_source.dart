@@ -68,7 +68,6 @@ class SaleLocalDatasourceImpl implements SaleLocalDataSource {
       final listOrder = salesByDay.map((o) => o.toModel().toEntity()).toList();
       return listOrder;
     } catch (e) {
-      print("error desde al local datasorce: ${e}");
       throw LocalFailure();
     }
   }
@@ -83,9 +82,7 @@ class SaleLocalDatasourceImpl implements SaleLocalDataSource {
       var nextMonthYear = (month.month == 12) ? month.year + 1 : month.year;
       var lastDayOfMonth = DateTime(nextMonthYear, nextMonth, 1).subtract(const Duration(days: 1));
       
-      print("${month.month} el mes es el");
       for (var i = 0; i < lastDayOfMonth.day; i++) {
-        print("${i + 1}");
         final salesByDay = box.values.where((sale) {
           return (sale.saleDate.year == month.year &&
               sale.saleDate.month == month.month &&
@@ -97,10 +94,9 @@ class SaleLocalDatasourceImpl implements SaleLocalDataSource {
         }
         result.add(sumaTotal);
       }
-      print(result);
       return result;
     } catch (e) {
-      print("error desde al local datasorce: ${e}");
+      debugPrint("error desde al local datasorce: ${e}");
       throw LocalFailure();
     }
   }
@@ -120,7 +116,7 @@ class SaleLocalDatasourceImpl implements SaleLocalDataSource {
       }
       return sumaTotal;
     } catch (e) {
-      print("error desde al local datasorce: ${e}");
+      debugPrint("error desde al local datasorce: ${e}");
       throw LocalFailure();
     }
   }

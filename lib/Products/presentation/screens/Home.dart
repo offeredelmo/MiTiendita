@@ -27,7 +27,7 @@ class _MyHomePageState extends State<MyHomePage> {
     _bannerAd = BannerAd(
       adUnitId: 'ca-app-pub-3940256099942544/6300978111', // Tu Ad Unit ID aquí
       size: AdSize.banner,
-      request: AdRequest(),
+      request: const AdRequest(),
       listener: BannerAdListener(
         onAdLoaded: (_) {
           setState(() {
@@ -35,7 +35,6 @@ class _MyHomePageState extends State<MyHomePage> {
           });
         },
         onAdFailedToLoad: (ad, error) {
-          print('Error al cargar el BannerAd: $error');
           ad.dispose();
         },
       ),
@@ -103,7 +102,6 @@ class _MyHomePageState extends State<MyHomePage> {
               const SizedBox(height: 10),
               BlocBuilder<SalesBlocBloc, SalesBlocState>(
                   builder: (context, state) {
-                print(state);
                 String totalSalesText = "Cargando...";
                 if (state is SalesGetTotalSalesSucces) {
                   totalSalesText = "Venta total: ${state.totalSales}";
@@ -134,7 +132,6 @@ class _MyHomePageState extends State<MyHomePage> {
                 );
               }),
               const SizedBox(height: 10),
-
               SizedBox(
                 width: MediaQuery.of(context).size.width * 0.9,
                 height: 50,
@@ -144,8 +141,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       Navigator.pushNamed(context, '/metrics');
                     }),
               ),
-
-              Spacer(),
+              const Spacer(),
               if (_isBannerAdReady)
                 SizedBox(
                   width: _bannerAd.size.width.toDouble(),
@@ -164,7 +160,7 @@ class _MyHomePageState extends State<MyHomePage> {
     String _productName = '';
     double _price = 0.0;
     int _quantity = 0;
-
+    final _addProduct = GlobalKey<FormState>();
     Future<void> _pickImage() async {
       final imagePicker = ImagePicker();
       final pickedFile =
@@ -216,118 +212,131 @@ class _MyHomePageState extends State<MyHomePage> {
                   return SingleChildScrollView(
                     controller: scrollController,
                     child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        children: [
-                          const SizedBox(height: 20),
-                          SizedBox(
-                            width: MediaQuery.of(context).size.width * 0.9,
-                            height: 50,
-                            child: TextFormField(
-                              decoration: const InputDecoration(
-                                border: OutlineInputBorder(),
-                                labelText: "Nombre del producto",
-                              ),
-                              onChanged: (value) {
-                                setState(() {
-                                  _productName = value;
-                                });
-                              },
-                            ),
-                          ),
-                          const SizedBox(height: 25),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              SizedBox(
-                                width:
-                                    MediaQuery.of(context).size.width * 0.425,
-                                child: TextFormField(
-                                  keyboardType: TextInputType.number,
-                                  decoration: const InputDecoration(
-                                    border: OutlineInputBorder(),
-                                    labelText: "Precio",
-                                  ),
-                                  onChanged: (value) {
-                                    setState(() {
-                                      _price = double.tryParse(value) ?? 0.0;
-                                    });
-                                  },
+                      padding: MediaQuery.of(context).viewInsets,
+                      child: Form(
+                        key: _addProduct,
+                        child: Column(
+                          children: [
+                            const SizedBox(height:30),
+                            SizedBox(
+                              width: MediaQuery.of(context).size.width * 0.9,
+                              child: TextFormField(
+                                decoration: const InputDecoration(
+                                  border: OutlineInputBorder(),
+                                  labelText: "Nombre del producto",
                                 ),
+                                validator: (value) {
+                                  if (value == null || value.trim().isEmpty) {
+                                    return "por favor ingresa un nombre";
+                                  }
+                                  return null;
+                                },
+                                onChanged: (value) {
+                                  setState(() {
+                                    _productName = value;
+                                  });
+                                },
                               ),
-                              SizedBox(
+                            ),
+                            const SizedBox(height: 25),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                SizedBox(
                                   width:
-                                      MediaQuery.of(context).size.width * 0.05),
-                              SizedBox(
-                                width:
-                                    MediaQuery.of(context).size.width * 0.425,
-                                child: TextFormField(
-                                  keyboardType: TextInputType.number,
-                                  decoration: const InputDecoration(
-                                    border: OutlineInputBorder(),
-                                    labelText: "Cantidad",
+                                      MediaQuery.of(context).size.width * 0.425,
+                                  child: TextFormField(
+                                    keyboardType: TextInputType.number,
+                                    decoration: const InputDecoration(
+                                      border: OutlineInputBorder(),
+                                      labelText: "Precio",
+                                    ),
+                                    validator: (value) {
+                                      if (value == null ||
+                                          value.trim().isEmpty) {
+                                        return "Ingresa el precio";
+                                      }
+                                      return null;
+                                    },
+                                    onChanged: (value) {
+                                      setState(() {
+                                        _price = double.tryParse(value) ?? 0.0;
+                                      });
+                                    },
                                   ),
-                                  onChanged: (value) {
-                                    setState(() {
-                                      _quantity = int.tryParse(value) ?? 0;
-                                    });
-                                  },
                                 ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 25),
-                          SizedBox(
-                            width: MediaQuery.of(context).size.width * 0.4,
-                            height: 50,
-                            child: GestureDetector(
-                              onTap: _pickImage,
-                              child: Container(
-                                height: 200,
-                                decoration: BoxDecoration(
-                                  border: Border.all(color: Colors.grey),
-                                  borderRadius: BorderRadius.circular(8.0),
+                                SizedBox(
+                                    width: MediaQuery.of(context).size.width *
+                                        0.05),
+                                SizedBox(
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.425,
+                                  child: TextFormField(
+                                    keyboardType: TextInputType.number,
+                                    decoration: const InputDecoration(
+                                      border: OutlineInputBorder(),
+                                      labelText: "Cantidad",
+                                    ),
+                                    onChanged: (value) {
+                                      setState(() {
+                                        _quantity = int.tryParse(value) ?? 0;
+                                      });
+                                    },
+                                  ),
                                 ),
-                                child: _selectedImage != null
-                                    ? Image.file(_selectedImage!,
-                                        fit: BoxFit.cover)
-                                    : const Center(
-                                        child: Icon(Icons.add_a_photo,
-                                            size: 50, color: Colors.grey),
-                                      ),
+                              ],
+                            ),
+                            const SizedBox(height: 25),
+                            SizedBox(
+                              width: MediaQuery.of(context).size.width * 0.4,
+                              height: 50,
+                              child: GestureDetector(
+                                onTap: _pickImage,
+                                child: Container(
+                                  height: 200,
+                                  decoration: BoxDecoration(
+                                    border: Border.all(color: Colors.grey),
+                                    borderRadius: BorderRadius.circular(8.0),
+                                  ),
+                                  child: _selectedImage != null
+                                      ? Image.file(_selectedImage!,
+                                          fit: BoxFit.cover)
+                                      : const Center(
+                                          child: Icon(Icons.add_a_photo,
+                                              size: 50, color: Colors.grey),
+                                        ),
+                                ),
                               ),
                             ),
-                          ),
-                          const SizedBox(height: 16.0),
-                          ElevatedButton(
-                            onPressed: () {
-                              if (_productName.isNotEmpty &&
-                                  _price > 0 &&
-                                  _quantity > 0) {
-                                final newProduct = Product(
-                                  id: "tripalosqui",
-                                  name: _productName,
-                                  price: _price,
-                                  stock: _quantity,
-                                  img_url:
-                                      _selectedImage?.path.toString() ?? "",
-                                );
+                            const SizedBox(height: 16.0),
+                            ElevatedButton(
+                              onPressed: () {
+                                setState(() {});
+                                if (_addProduct.currentState!.validate()) {
+                                  final newProduct = Product(
+                                    id: "",
+                                    name: _productName,
+                                    price: _price,
+                                    stock: _quantity,
+                                    img_url:
+                                        _selectedImage?.path.toString() ?? "",
+                                  );
 
-                                BlocProvider.of<ProductsBloc>(context)
-                                    .add(AddProducts(product: newProduct));
-                              } else {
-                                // Show an error message to the user
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                      content: Text(
-                                          "Por favor, complete todos los campos requeridos.")),
-                                );
-                              }
-                            },
-                            child: const Text('Guardar Producto'),
-                          ),
-                        ],
-                      ),
+                                  BlocProvider.of<ProductsBloc>(context)
+                                      .add(AddProducts(product: newProduct));
+                                } else {
+                                  //   ScaffoldMessenger.of(context).showSnackBar(
+                                  //   const SnackBar(
+                                  //       content: Text(
+                                  //           "Por favor, complete todos los campos requeridos.")),
+                                  // );
+                                }
+                              },
+                              child: const Text('Guardar Producto'),
+                            ),
+                          ],
+                        ),
+                      )
                     ),
                   );
                 },
