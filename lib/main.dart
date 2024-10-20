@@ -11,13 +11,11 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:mi_tiendita/Products/di.dart';
 import 'package:mi_tiendita/Products/presentation/bloc/products_bloc.dart';
-import 'package:month_year_picker/month_year_picker.dart';
 
 import 'Products/presentation/screens/Home.dart';
 import 'Products/presentation/screens/Products.dart';
 import 'Sales/presentation/bloc/bloc_get_orders/get_sales_by_day_bloc.dart';
 
-import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'Sales/presentation/bloc/metrics/metrics_bloc.dart';
 

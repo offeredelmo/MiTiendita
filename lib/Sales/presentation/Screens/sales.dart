@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:mi_tiendita/Sales/domain/sales.entity.dart';
-import 'package:mi_tiendita/Sales/presentation/bloc/sales/sales_bloc_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../bloc/bloc_get_orders/get_sales_by_day_bloc.dart';
@@ -104,6 +103,9 @@ class _SaleScreenBodyState extends State<SaleScreenBody> {
                 if (state is SalesGetSalesByDayLoading) {
                   return const Text("Cargando");
                 } else if (state is SalesGetSalesByDaySucces) {
+                  if (state.sales.isEmpty) {
+                      return const Center(child: Text("Aun no se han registrado ventas"));
+                  }
                   return CustomCardOrder(ejemploVenta: state.sales);
                 } else {
                   return const Text("A ocurrido un error intenta de nuevo");

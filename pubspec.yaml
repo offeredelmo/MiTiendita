@@ -45,6 +45,7 @@ dependencies:
   intl: any
   flutter_localizations:
     sdk: flutter
+  bloc: ^8.1.4
   
 
 dev_dependencies:

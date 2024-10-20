@@ -128,7 +128,7 @@ class _BodyMetricsState extends State<BodyMetrics> {
                           padding: const EdgeInsets.all(5),
                           height: 40,
                           child: Text(
-                            "Total de mes: ${_totoalMonth(state.totalSales)}",
+                            "Total del mes: ${_totoalMonth(state.totalSales)}",
                             style: const TextStyle(fontSize: 20),
                           ),
                         ),
@@ -137,7 +137,9 @@ class _BodyMetricsState extends State<BodyMetrics> {
                               itemCount: state.totalSales.length,
                               itemBuilder: (context, index) {
                                 return Card(
+                                  margin: EdgeInsets.symmetric(vertical: 5, horizontal: 15),
                                   child: Container(
+                                      width: MediaQuery.of(context).size.width * 0.9,
                                       padding: const EdgeInsets.all(5),
                                       height: 50,
                                       child: Row(

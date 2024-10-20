@@ -1,11 +1,9 @@
 import 'package:bloc/bloc.dart';
 import 'package:mi_tiendita/Sales/domain/sales.entity.dart';
 import 'package:mi_tiendita/Sales/domain/use_case/add_sale.dart';
-import 'package:mi_tiendita/Sales/domain/use_case/get_sale_by_month.dart';
 import 'package:mi_tiendita/Sales/domain/use_case/get_total_sale_by_day.dart';
 import 'package:meta/meta.dart';
 
-import '../../../domain/use_case/get_sale_by_day.dart';
 
 part 'sales_bloc_event.dart';
 part 'sales_bloc_state.dart';

@@ -100,6 +100,9 @@ class _BodySellState extends State<BodySell> {
                 if (state is ProductGetListLoading) {
                   return const Center(child: CircularProgressIndicator());
                 } else if (state is ProductsSuccesProductList) {
+                  if (state.products.isEmpty) {
+                    return const Expanded(child: Center(child: Text("No hay productos para mostrar regrese al inicio y agregue un producto", style: TextStyle(fontSize: 18),)));
+                  }
                   return Expanded(
                     child: ListView.builder(
                       itemCount: state.products.length,

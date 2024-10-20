@@ -61,6 +61,9 @@ class ProductList extends StatelessWidget {
         if (state is ProductGetListLoading) {
           return const Center(child: CircularProgressIndicator());
         } else if (state is ProductsSuccesProductList) {
+          if (state.products.isEmpty) {
+            return const Center(child: Text("Aun no hay producto regresa al inicio y agrega un nuevo producto", style: TextStyle(fontSize: 18)), );
+          }
           return ListView.builder(
             itemCount: state.products.length,
             itemBuilder: (context, index) {
