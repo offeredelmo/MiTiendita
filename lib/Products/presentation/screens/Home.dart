@@ -173,174 +173,161 @@ class _MyHomePageState extends State<MyHomePage> {
     }
 
     return showModalBottomSheet(
-        isScrollControlled: true, // Esto permite controlar la altura del modal
-        context: context,
-        builder: (BuildContext context) {
-          return BlocListener<ProductsBloc, ProductsState>(
-              listener: (context, state) {
-                if (state is ProductAddLoading) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text("Se está agregando el producto..."),
-                      duration: Duration(milliseconds: 900),
-                    ),
-                  );
-                } else if (state is ProductsSucces) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text("El producto se ha agregado exitosamente."),
-                      backgroundColor: Colors.green,
-                    ),
-                  );
-                  Navigator.pop(
-                      context); // Cierra el modal después de agregar exitosamente
-                } else if (state is ProductsFailure) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                        content: Text(
-                            "Ha ocurrido un error. Si persiste, contáctenos por correo electrónico.")),
-                  );
-                }
-              },
-              child: DraggableScrollableSheet(
-                expand: false,
-                initialChildSize:
-                    0.7, // Define el porcentaje inicial de la pantalla (85%)
-                maxChildSize: 0.7, // Tamaño máximo al expandir (95%)
-                minChildSize: 0.6, // Tamaño mínimo
-                builder: (context, scrollController) {
-                  return SingleChildScrollView(
-                    controller: scrollController,
-                    child: Padding(
-                      padding: MediaQuery.of(context).viewInsets,
-                      child: Form(
-                        key: _addProduct,
-                        child: Column(
-                          children: [
-                            const SizedBox(height:30),
-                            SizedBox(
-                              width: MediaQuery.of(context).size.width * 0.9,
-                              child: TextFormField(
-                                decoration: const InputDecoration(
-                                  border: OutlineInputBorder(),
-                                  labelText: "Nombre del producto",
-                                ),
-                                validator: (value) {
-                                  if (value == null || value.trim().isEmpty) {
-                                    return "por favor ingresa un nombre";
-                                  }
-                                  return null;
-                                },
-                                onChanged: (value) {
-                                  setState(() {
-                                    _productName = value;
-                                  });
-                                },
-                              ),
-                            ),
-                            const SizedBox(height: 25),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                SizedBox(
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.425,
-                                  child: TextFormField(
-                                    keyboardType: TextInputType.number,
-                                    decoration: const InputDecoration(
-                                      border: OutlineInputBorder(),
-                                      labelText: "Precio",
-                                    ),
-                                    validator: (value) {
-                                      if (value == null ||
-                                          value.trim().isEmpty) {
-                                        return "Ingresa el precio";
-                                      }
-                                      return null;
-                                    },
-                                    onChanged: (value) {
-                                      setState(() {
-                                        _price = double.tryParse(value) ?? 0.0;
-                                      });
-                                    },
-                                  ),
-                                ),
-                                SizedBox(
-                                    width: MediaQuery.of(context).size.width *
-                                        0.05),
-                                SizedBox(
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.425,
-                                  child: TextFormField(
-                                    keyboardType: TextInputType.number,
-                                    decoration: const InputDecoration(
-                                      border: OutlineInputBorder(),
-                                      labelText: "Cantidad",
-                                    ),
-                                    onChanged: (value) {
-                                      setState(() {
-                                        _quantity = int.tryParse(value) ?? 0;
-                                      });
-                                    },
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 25),
-                            SizedBox(
-                              width: MediaQuery.of(context).size.width * 0.4,
-                              height: 50,
-                              child: GestureDetector(
-                                onTap: _pickImage,
-                                child: Container(
-                                  height: 200,
-                                  decoration: BoxDecoration(
-                                    border: Border.all(color: Colors.grey),
-                                    borderRadius: BorderRadius.circular(8.0),
-                                  ),
-                                  child: _selectedImage != null
-                                      ? Image.file(_selectedImage!,
-                                          fit: BoxFit.cover)
-                                      : const Center(
-                                          child: Icon(Icons.add_a_photo,
-                                              size: 50, color: Colors.grey),
-                                        ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 16.0),
-                            ElevatedButton(
-                              onPressed: () {
-                                setState(() {});
-                                if (_addProduct.currentState!.validate()) {
-                                  final newProduct = Product(
-                                    id: "",
-                                    name: _productName,
-                                    price: _price,
-                                    stock: _quantity,
-                                    img_url:
-                                        _selectedImage?.path.toString() ?? "",
-                                  );
-
-                                  BlocProvider.of<ProductsBloc>(context)
-                                      .add(AddProducts(product: newProduct));
-                                } else {
-                                  //   ScaffoldMessenger.of(context).showSnackBar(
-                                  //   const SnackBar(
-                                  //       content: Text(
-                                  //           "Por favor, complete todos los campos requeridos.")),
-                                  // );
-                                }
-                              },
-                              child: const Text('Guardar Producto'),
-                            ),
-                          ],
+      isScrollControlled: true, // Esto permite controlar la altura del modal
+      context: context,
+      builder: (BuildContext context) {
+        return BlocListener<ProductsBloc, ProductsState>(
+          listener: (context, state) {
+            if (state is ProductAddLoading) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text("Se está agregando el producto..."),
+                  duration: Duration(milliseconds: 900),
+                ),
+              );
+            } else if (state is ProductsSucces) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text("El producto se ha agregado exitosamente."),
+                  backgroundColor: Colors.green,
+                ),
+              );
+              Navigator.pop(
+                  context); // Cierra el modal después de agregar exitosamente
+            } else if (state is ProductsFailure) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                    content: Text(
+                        "Ha ocurrido un error. Si persiste, contáctenos por correo electrónico.")),
+              );
+            }
+          },
+          child: Padding(
+            padding: MediaQuery.of(context)
+                .viewInsets, // Ajusta el padding al teclado
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Form(
+                key: _addProduct,
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const SizedBox(height: 30),
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width * 0.9,
+                        child: TextFormField(
+                          decoration: const InputDecoration(
+                            border: OutlineInputBorder(),
+                            labelText: "Nombre del producto",
+                          ),
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return "por favor ingresa un nombre";
+                            }
+                            return null;
+                          },
+                          onChanged: (value) {
+                            setState(() {
+                              _productName = value;
+                            });
+                          },
                         ),
-                      )
-                    ),
-                  );
-                },
-              ));
-        });
+                      ),
+                      const SizedBox(height: 25),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width * 0.425,
+                            child: TextFormField(
+                              keyboardType: TextInputType.number,
+                              decoration: const InputDecoration(
+                                border: OutlineInputBorder(),
+                                labelText: "Precio",
+                              ),
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return "Ingresa el precio";
+                                }
+                                return null;
+                              },
+                              onChanged: (value) {
+                                setState(() {
+                                  _price = double.tryParse(value) ?? 0.0;
+                                });
+                              },
+                            ),
+                          ),
+                          SizedBox(width: MediaQuery.of(context).size.width * 0.05),
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width * 0.425,
+                            child: TextFormField(
+                              keyboardType: TextInputType.number,
+                              decoration: const InputDecoration(
+                                border: OutlineInputBorder(),
+                                labelText: "Cantidad",
+                              ),
+                              onChanged: (value) {
+                                setState(() {
+                                  _quantity = int.tryParse(value) ?? 0;
+                                });
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 25),
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width * 0.4,
+                        height: 50,
+                        child: GestureDetector(
+                          onTap: _pickImage,
+                          child: Container(
+                            height: 200,
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.grey),
+                              borderRadius: BorderRadius.circular(8.0),
+                            ),
+                            child: _selectedImage != null
+                                ? Image.file(_selectedImage!, fit: BoxFit.cover)
+                                : const Center(
+                                    child: Icon(Icons.add_a_photo,
+                                        size: 50, color: Colors.grey),
+                                  ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16.0),
+                      ElevatedButton(
+                        onPressed: () {
+                          setState(() {});
+                          if (_addProduct.currentState!.validate()) {
+                            final newProduct = Product(
+                              id: "",
+                              name: _productName,
+                              price: _price,
+                              stock: _quantity,
+                              img_url: _selectedImage?.path.toString() ?? "",
+                            );
+                                
+                            BlocProvider.of<ProductsBloc>(context)
+                                .add(AddProducts(product: newProduct));
+                          } else {
+                            
+                          }
+                        },
+                        child: const Text('Guardar Producto'),
+                      ),
+                      ElevatedButton(onPressed: (){Navigator.pop(context);}, child: const Text("Cancelar"))
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 }
