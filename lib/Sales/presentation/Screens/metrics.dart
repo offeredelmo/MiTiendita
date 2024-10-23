@@ -140,7 +140,7 @@ class _BodyMetricsState extends State<BodyMetrics> {
                             child: Center(
                               child: Text(
                                 "Total del mes: ${_totoalMonth(state.totalSales)}",
-                                style: const TextStyle(fontSize: 20),
+                                style: const TextStyle(fontSize: 17), 
                               ),
                             ),
                           ),
@@ -159,16 +159,14 @@ class _BodyMetricsState extends State<BodyMetrics> {
                                         children: [
                                           Text(
                                             "Fecha: ${index + 1} de $selectedMonth $selectedYear",
-                                            style:
-                                                const TextStyle(fontSize: 18),
+                                          
                                           ),
                                           const SizedBox(
                                             width: 10,
                                           ),
                                           Text(
                                             "Total ${state.totalSales[index]}",
-                                            style:
-                                                const TextStyle(fontSize: 18),
+                                
                                           ),
                                         ],
                                       )),

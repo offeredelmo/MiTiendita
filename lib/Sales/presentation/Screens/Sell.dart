@@ -49,8 +49,17 @@ class BodySell extends StatefulWidget {
 
 class _BodySellState extends State<BodySell> {
   double totalSell = 0;
-
   final List<SaleItem> order = [];
+  final TextEditingController _searchController = TextEditingController();
+
+  List<Product> filteredProducts = [];
+  List<Product> allProducts = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController.addListener(_onSearchChanged);
+  }
 
   void _totalSell() {
     setState(() {
@@ -61,6 +70,16 @@ class _BodySellState extends State<BodySell> {
 
   void _onOrderChanged() {
     _totalSell();
+  }
+
+  void _onSearchChanged() {
+    setState(() {
+      filteredProducts = allProducts
+          .where((product) => product.name
+              .toLowerCase()
+              .contains(_searchController.text.toLowerCase()))
+          .toList();
+    });
   }
 
   @override
@@ -101,13 +120,21 @@ class _BodySellState extends State<BodySell> {
                   return const Center(child: CircularProgressIndicator());
                 } else if (state is ProductsSuccesProductList) {
                   if (state.products.isEmpty) {
-                    return const Expanded(child: Center(child: Text("No hay productos para mostrar regrese al inicio y agregue un producto", style: TextStyle(fontSize: 18),)));
+                    return const Expanded(
+                        child: Center(
+                            child: Text(
+                      "No hay productos para mostrar regrese al inicio y agregue un producto",
+                      style: TextStyle(fontSize: 18),
+                    )));
                   }
+                  allProducts = state.products;
+                  filteredProducts =
+                      filteredProducts.isEmpty ? allProducts : filteredProducts;
                   return Expanded(
                     child: ListView.builder(
-                      itemCount: state.products.length,
+                      itemCount: filteredProducts.length,
                       itemBuilder: (context, index) {
-                        final product = state.products[index];
+                        final product = filteredProducts[index];
                         return CustomCardSell(
                           product: product,
                           order: order,
@@ -137,16 +164,23 @@ class _BodySellState extends State<BodySell> {
     return SizedBox(
       width: MediaQuery.of(context).size.width * 0.95,
       child: TextField(
+        controller: _searchController,
         decoration: InputDecoration(
             hintText: 'Buscar...',
-            prefixIcon: const Icon(Icons.search), // Icono de búsqueda al inicio
+            prefixIcon: const Icon(Icons.search),
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10.0), // Bordes redondeados
-              borderSide: BorderSide.none, // Sin bordes
+              borderRadius: BorderRadius.circular(10.0),
+              borderSide: BorderSide.none,
             ),
-            filled: true, // Fondo de color
-            fillColor: Colors.grey[200], // Color gris claro para el fondo
-            contentPadding: EdgeInsets.zero),
+            filled: true,
+            fillColor: Colors.grey[200],
+            contentPadding: EdgeInsets.zero,
+            suffixIcon: IconButton(
+                onPressed: () {
+                  _searchController.clear();
+                  _onSearchChanged();
+                },
+                icon: const Icon(Icons.clear))),
       ),
     );
   }
@@ -226,7 +260,7 @@ class _CustomCardSellState extends State<CustomCardSell> {
           child: Row(children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(5.0),
-              child:  _imageWidget(widget.product.img_url),
+              child: _imageWidget(widget.product.img_url),
             ),
             const SizedBox(width: 10),
             Expanded(
@@ -325,7 +359,7 @@ class _CustomCardSellState extends State<CustomCardSell> {
         ));
   }
 
-    // Función para obtener el widget de imagen o el fallback
+  // Función para obtener el widget de imagen o el fallback
   Widget _imageWidget(String? imagePath) {
     if (imagePath != null && imagePath.isNotEmpty) {
       File imageFile = File(imagePath);
@@ -346,7 +380,7 @@ class _CustomCardSellState extends State<CustomCardSell> {
     }
   }
 
-    // Widget de fallback (imagen por defecto)
+  // Widget de fallback (imagen por defecto)
   Widget _fallbackImage() {
     return Container(
       width: 90,
