@@ -6,6 +6,7 @@ class Product {
   final String name;
   final double price;
   final int stock;
+  final String? barCode;
 
   Product(
       {required this.id,
@@ -13,5 +14,7 @@ class Product {
       this.img_base,
       required this.name,
       required this.price,
-      required this.stock});
+      required this.stock,
+      this.barCode
+      });
 }

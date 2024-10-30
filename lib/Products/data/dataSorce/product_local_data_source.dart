@@ -36,6 +36,7 @@ class ProductsLocalDataSourceImpl implements ProductsLocalDataSource {
         img_url: product.img_url,
         price: product.price,
         stock: product.stock,
+        barCode: product.barCode
       );
       await box.put(id, ProductDto.fromModel(productWithId));
       return true;

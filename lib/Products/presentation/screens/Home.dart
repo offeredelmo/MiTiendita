@@ -1,12 +1,15 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bluetooth_printer/flutter_bluetooth_printer.dart';
+import 'package:get_it/get_it.dart';
 import 'package:mi_tiendita/Sales/presentation/bloc/sales/sales_bloc_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mi_tiendita/Products/domain/entities.dart';
 import 'package:mi_tiendita/Products/presentation/bloc/products_bloc.dart';
+import 'package:mi_tiendita/core/utils/bluethoot_service.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
@@ -18,6 +21,8 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   late BannerAd _bannerAd;
   bool _isBannerAdReady = false;
+  BluetoothDevice? actualDevice;
+  final BluetoothService bluetoothService = GetIt.instance<BluetoothService>();
 
   @override
   void initState() {
@@ -25,7 +30,7 @@ class _MyHomePageState extends State<MyHomePage> {
     context.read<SalesBlocBloc>().add(GetTotalSales(day: DateTime.now()));
 
     _bannerAd = BannerAd(
-      adUnitId: 'ca-app-pub-3940256099942544/6300978111', // Tu Ad Unit ID aquí
+      adUnitId: 'ca-app-pub-2901258575619881/7507827726', // Tu Ad Unit ID aquí
       size: AdSize.banner,
       request: const AdRequest(),
       listener: BannerAdListener(
@@ -39,7 +44,6 @@ class _MyHomePageState extends State<MyHomePage> {
         },
       ),
     );
-
     _bannerAd.load();
   }
 
@@ -141,6 +145,24 @@ class _MyHomePageState extends State<MyHomePage> {
                       Navigator.pushNamed(context, '/metrics');
                     }),
               ),
+              const SizedBox(height: 20),
+              // ElevatedButton(
+              //   child: const Text('Seleccionar e una impresora'),
+              //   onPressed: () async {
+              //     final device =
+              //         await FlutterBluetoothPrinter.selectDevice(context);
+              //     if (device != null) {
+              //       setState(() {
+              //       bluetoothService.setDevice(device);
+                      
+              //       });
+              //     }
+              //   },
+              // ),
+              // const SizedBox(height: 20),
+              // Text(
+              //   "Impresora conectada: ${bluetoothService.device?.name ?? 'Ninguna'}",
+              // ),
               const Spacer(),
               if (_isBannerAdReady)
                 SizedBox(
@@ -160,6 +182,8 @@ class _MyHomePageState extends State<MyHomePage> {
     String _productName = '';
     double _price = 0.0;
     int _quantity = 0;
+    String _barCode = "";
+
     final _addProduct = GlobalKey<FormState>();
     Future<void> _pickImage() async {
       final imagePicker = ImagePicker();
@@ -259,7 +283,8 @@ class _MyHomePageState extends State<MyHomePage> {
                               },
                             ),
                           ),
-                          SizedBox(width: MediaQuery.of(context).size.width * 0.05),
+                          SizedBox(
+                              width: MediaQuery.of(context).size.width * 0.05),
                           SizedBox(
                             width: MediaQuery.of(context).size.width * 0.425,
                             child: TextFormField(
@@ -276,6 +301,22 @@ class _MyHomePageState extends State<MyHomePage> {
                             ),
                           ),
                         ],
+                      ),
+                      const SizedBox(height: 25),
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width * 0.9,
+                        child: TextFormField(
+                          keyboardType: TextInputType.number,
+                          decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                              labelText: "Codigo de barras",
+                              helperText: "opccional"),
+                          onChanged: (value) {
+                            setState(() {
+                              _barCode = value;
+                            });
+                          },
+                        ),
                       ),
                       const SizedBox(height: 25),
                       SizedBox(
@@ -304,22 +345,24 @@ class _MyHomePageState extends State<MyHomePage> {
                           setState(() {});
                           if (_addProduct.currentState!.validate()) {
                             final newProduct = Product(
-                              id: "",
-                              name: _productName,
-                              price: _price,
-                              stock: _quantity,
-                              img_url: _selectedImage?.path.toString() ?? "",
-                            );
-                                
+                                id: "",
+                                name: _productName,
+                                price: _price,
+                                stock: _quantity,
+                                img_url: _selectedImage?.path.toString() ?? "",
+                                barCode: _barCode ?? "");
+
                             BlocProvider.of<ProductsBloc>(context)
                                 .add(AddProducts(product: newProduct));
-                          } else {
-                            
-                          }
+                          } else {}
                         },
                         child: const Text('Guardar Producto'),
                       ),
-                      ElevatedButton(onPressed: (){Navigator.pop(context);}, child: const Text("Cancelar"))
+                      ElevatedButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child: const Text("Cancelar"))
                     ],
                   ),
                 ),

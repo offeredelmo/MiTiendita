@@ -1,7 +1,11 @@
+import 'package:dartz/dartz_unsafe.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bluetooth_printer/flutter_bluetooth_printer.dart';
+import 'package:get_it/get_it.dart';
 import 'package:mi_tiendita/Sales/domain/sales.entity.dart';
 import 'package:mi_tiendita/Sales/presentation/bloc/sales/sales_bloc_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mi_tiendita/core/utils/bluethoot_service.dart';
 
 class ButtonPay extends StatefulWidget {
   final double totalSell;
@@ -91,6 +95,8 @@ class _ConfirmPayModalState extends State<ConfirmPayModal> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   late TextEditingController controllerUserPay;
   double quantityUserPay = 0.0;
+  ReceiptController? controller;
+  final BluetoothService bluetoothService = GetIt.instance<BluetoothService>();
 
   @override
   void initState() {
@@ -179,7 +185,7 @@ class _ConfirmPayModalState extends State<ConfirmPayModal> {
                 ),
                 const SizedBox(height: 30),
                 ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
                     if (_formKey.currentState!.validate()) {
                       final newOrder = SalesEntity(
                         id: "", // Asigna un ID único según tu lógica
@@ -190,6 +196,15 @@ class _ConfirmPayModalState extends State<ConfirmPayModal> {
 
                       BlocProvider.of<SalesBlocBloc>(context)
                           .add(AddSales(salesEntity: newOrder));
+
+                      if (bluetoothService.device?.address == null) {
+                        print(
+                            'La dirección del dispositivo es nula. No se puede imprimir.');
+                      } else {
+                        print(bluetoothService.device!.address);
+                        controller?.print(
+                            address: bluetoothService.device!.address);
+                      }
 
                       Navigator.pop(context); // Cerrar el modal
 
@@ -212,4 +227,36 @@ class _ConfirmPayModalState extends State<ConfirmPayModal> {
       ),
     );
   }
+}
+
+Widget build(BuildContext context, SalesEntity sale) {
+  ReceiptController? controller;
+  double printerWidth = 58 * 2.83465; // configuracion de la impresora 
+   
+  return Receipt(
+    builder: (context) => Column(
+      children: [
+        const Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [Text("Nombre de la empresa")],
+        ),
+        const SizedBox(height: 10),
+        const Text('Direccion: Primera oriente numero 12'),
+        Text('Fecha: ${DateTime.now()}'),
+        const Text('--------------------------'),
+        Text("Cantidad -- Producto      -- PRE.UNIT --  Total "),
+        for (final item in sale.items)
+          Row(
+            children: [
+              SizedBox(child: Text("${item.quantity}")),
+              Text("${item.product.name}"),
+              Text("${item.product.price}" ),
+            ],
+          )
+      ],
+    ),
+    onInitialized: (ctrl) {
+      controller = ctrl;
+    },
+  );
 }

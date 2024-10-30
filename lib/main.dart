@@ -34,7 +34,6 @@ class MyApp extends StatelessWidget {
 
   Widget build(BuildContext context) {
     return MultiBlocProvider(
-      
       providers: [
         BlocProvider(create: (_) => GetIt.instance.get<ProductsBloc>()),
         BlocProvider(create: (_) => GetIt.instance.get<SalesBlocBloc>()),

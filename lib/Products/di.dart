@@ -16,6 +16,7 @@ import 'package:mi_tiendita/Sales/domain/sales.repository.dart';
 import 'package:mi_tiendita/Sales/domain/use_case/add_sale.dart';
 import 'package:mi_tiendita/Sales/domain/use_case/get_sales.dart';
 import 'package:mi_tiendita/Sales/presentation/bloc/sales/sales_bloc_bloc.dart';
+import 'package:mi_tiendita/core/utils/bluethoot_service.dart';
 
 import '../Sales/data/repository/sales_repository_impl.dart';
 import '../Sales/domain/use_case/get_sale_by_day.dart';
@@ -27,6 +28,9 @@ import '../Sales/presentation/bloc/metrics/metrics_bloc.dart';
 final di = GetIt.instance;
 
 Future<void> init() async{
+
+  di.registerSingleton<BluetoothService>(BluetoothService());
+
   //bloc
   di.registerFactory(() => ProductsBloc(di(), di(), di(), di()));
 
