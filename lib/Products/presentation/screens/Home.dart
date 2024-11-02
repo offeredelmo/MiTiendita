@@ -23,7 +23,6 @@ class _MyHomePageState extends State<MyHomePage> {
   bool _isBannerAdReady = false;
   BluetoothDevice? actualDevice;
   final BluetoothService bluetoothService = GetIt.instance<BluetoothService>();
-
   @override
   void initState() {
     super.initState();
@@ -60,6 +59,14 @@ class _MyHomePageState extends State<MyHomePage> {
       child: Scaffold(
         appBar: AppBar(
           title: const Text("Mi tiendita"),
+          actions: [
+            IconButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, '/print');
+                },
+                icon: bluetoothService?.device != null? const Icon(Icons.print) : const Icon(Icons.print_disabled)
+                )
+          ],
         ),
         body: Center(
           child: Column(
@@ -146,23 +153,6 @@ class _MyHomePageState extends State<MyHomePage> {
                     }),
               ),
               const SizedBox(height: 20),
-              // ElevatedButton(
-              //   child: const Text('Seleccionar e una impresora'),
-              //   onPressed: () async {
-              //     final device =
-              //         await FlutterBluetoothPrinter.selectDevice(context);
-              //     if (device != null) {
-              //       setState(() {
-              //       bluetoothService.setDevice(device);
-                      
-              //       });
-              //     }
-              //   },
-              // ),
-              // const SizedBox(height: 20),
-              // Text(
-              //   "Impresora conectada: ${bluetoothService.device?.name ?? 'Ninguna'}",
-              // ),
               const Spacer(),
               if (_isBannerAdReady)
                 SizedBox(

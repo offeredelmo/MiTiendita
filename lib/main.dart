@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mi_tiendita/Print/Presentation/Screen/Print_screen.dart';
 import 'package:mi_tiendita/Products/data/models/product_model.dart';
 import 'package:mi_tiendita/Sales/data/models/sele_model.dart';
 import 'package:mi_tiendita/Sales/presentation/Screens/Sell.dart';
@@ -52,7 +53,8 @@ class MyApp extends StatelessWidget {
           "/products": (context) => const Products(),
           "/sell": (context) => const SellScreen(),
           "/sales": (context) => const SalesScreen(),
-          "/metrics": (context) => const Metrics()
+          "/metrics": (context) => const Metrics(),
+          "/print": (context) => const PrintScreen()
         },
       ),
     );
