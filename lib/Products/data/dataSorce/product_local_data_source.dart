@@ -68,7 +68,7 @@ class ProductsLocalDataSourceImpl implements ProductsLocalDataSource {
         existingProductDto.price = productToUpdate.price;
         existingProductDto.stock = productToUpdate.stock;
         existingProductDto.img_url = productToUpdate.img_url;
-
+        existingProductDto.barCode = productToUpdate.barCode;
         // Guardar los cambios
         await existingProductDto.save();
         return true;

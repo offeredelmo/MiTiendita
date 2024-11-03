@@ -10,41 +10,34 @@ class ProductModel extends Product {
     required String name,
     required double price,
     required int stock,
+    String? barCode,
   }) : super(
-          id: id,
-          img_url: img_url,
-          name: name,
-          price: price,
-          stock: stock,
-        );
+            id: id,
+            img_url: img_url,
+            name: name,
+            price: price,
+            stock: stock,
+            barCode: barCode);
 
-  // Implementación correcta de fromEntity como constructor factory
   factory ProductModel.fromEntity(Product product) {
-
-    // Validar campos esenciales, excepto img_url
-    if (product.id.isEmpty || product.name.isEmpty) {
-    }
-
-    // No validar img_url ya que puede ser null
-
     return ProductModel(
-      id: product.id,
-      img_url: product.img_url, // Permitir que sea null
-      name: product.name,
-      price: product.price,
-      stock: product.stock,
-    );
+        id: product.id,
+        img_url: product.img_url, // Permitir que sea null
+        name: product.name,
+        price: product.price,
+        stock: product.stock,
+        barCode: product.barCode);
   }
 
   // Implementación de fromJson
   factory ProductModel.fromJson(Map<String, dynamic> json) {
     return ProductModel(
-      id: json["_id"],
-      img_url: json["img_url"],
-      name: json["name"],
-      price: (json["price"] as num).toDouble(),
-      stock: json["stock"],
-    );
+        id: json["_id"],
+        img_url: json["img_url"],
+        name: json["name"],
+        price: json["price"].toDouble(),
+        stock: json["stock"],
+        barCode: json["barCode"]);
   }
 
   // Método toJson
@@ -55,18 +48,19 @@ class ProductModel extends Product {
       "name": name,
       "price": price,
       "stock": stock,
+      "barCode": barCode
     };
   }
 
   // Implementación de toEntity
   Product toEntity() {
     return Product(
-      id: id,
-      img_url: img_url,
-      name: name,
-      price: price,
-      stock: stock,
-    );
+        id: id,
+        img_url: img_url,
+        name: name,
+        price: price,
+        stock: stock,
+        barCode: barCode);
   }
 }
 
@@ -87,27 +81,36 @@ class ProductDto extends HiveObject {
   @HiveField(4)
   int stock;
 
-  ProductDto({
-    required this.id,
-    this.img_url,
-    required this.name,
-    required this.price,
-    required this.stock,
-  });
+  @HiveField(5)
+  String? barCode;
+
+  ProductDto(
+      {required this.id,
+      this.img_url,
+      required this.name,
+      required this.price,
+      required this.stock,
+      this.barCode});
 
   factory ProductDto.fromModel(Product product) {
     return ProductDto(
-      id: product.id,
-      img_url: product.img_url,
-      name: product.name,
-      price: product.price,
-      stock: product.stock,
-    );
+        id: product.id,
+        img_url: product.img_url,
+        name: product.name,
+        price: product.price,
+        stock: product.stock,
+        barCode: product.barCode);
   }
   // Convertir de ProductDto a Product
   Product toProduct() {
     return ProductModel(
-        id: id, img_url: img_url, name: name, price: price, stock: stock);
+        id: id, 
+        img_url: img_url, 
+        name: name, 
+        price: price, 
+        stock: stock,
+        barCode: barCode
+        );
   }
 
   ProductModel toModel() {
@@ -117,6 +120,7 @@ class ProductDto extends HiveObject {
       name: name,
       price: price,
       stock: stock,
+      barCode: barCode
     );
   }
 }

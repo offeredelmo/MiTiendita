@@ -81,6 +81,7 @@ class _BodyPrintScreenState extends State<BodyPrintScreen> {
                   if (device != null) {
                     setState(() {
                       bluetoothService.setDevice(device);
+                      
                     });
                   }
                 },

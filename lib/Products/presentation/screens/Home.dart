@@ -60,12 +60,21 @@ class _MyHomePageState extends State<MyHomePage> {
         appBar: AppBar(
           title: const Text("Mi tiendita"),
           actions: [
-            IconButton(
-                onPressed: () {
-                  Navigator.pushNamed(context, '/print');
-                },
-                icon: bluetoothService?.device != null? const Icon(Icons.print) : const Icon(Icons.print_disabled)
-                )
+            ValueListenableBuilder<bool>(
+              valueListenable: bluetoothService.isConnectedNotifier,
+              builder: (context, isConnected, child) {
+                  return IconButton(
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/print');
+                  
+                  },
+                  icon: bluetoothService.device != null?
+                    Icon(Icons.print, color: Colors.green,) : 
+                    Icon(Icons.print_disabled, color: Colors.red,)
+                  );
+              },
+            
+            )
           ],
         ),
         body: Center(

@@ -125,7 +125,7 @@ class _ProductCardState extends State<ProductCard> {
                 ),
                 Text("Stock: ${widget.product.stock}"),
                 Text("Precio: \$${widget.product.price}"),
-                const SizedBox(height: 8),
+                Text("codigo: ${widget.product.barCode}"),
               ],
             )),
             Column(

@@ -22,13 +22,14 @@ class ProductDtoAdapter extends TypeAdapter<ProductDto> {
       name: fields[2] as String,
       price: fields[3] as double,
       stock: fields[4] as int,
+      barCode: fields[5] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, ProductDto obj) {
     writer
-      ..writeByte(5)
+      ..writeByte(6)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -38,7 +39,9 @@ class ProductDtoAdapter extends TypeAdapter<ProductDto> {
       ..writeByte(3)
       ..write(obj.price)
       ..writeByte(4)
-      ..write(obj.stock);
+      ..write(obj.stock)
+      ..writeByte(5)
+      ..write(obj.barCode);
   }
 
   @override
