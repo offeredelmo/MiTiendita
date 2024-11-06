@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mi_tiendita/Print/Presentation/Screen/Print_screen.dart';
+import 'package:mi_tiendita/Ticket/Presentation/Screen/Print_screen.dart';
 import 'package:mi_tiendita/Products/data/models/product_model.dart';
 import 'package:mi_tiendita/Sales/data/models/sele_model.dart';
 import 'package:mi_tiendita/Sales/presentation/Screens/Sell.dart';
@@ -19,6 +19,8 @@ import 'Sales/presentation/bloc/bloc_get_orders/get_sales_by_day_bloc.dart';
 
 
 import 'Sales/presentation/bloc/metrics/metrics_bloc.dart';
+import 'Ticket/Data/models/ticket_model.dart';
+import 'Ticket/Presentation/Bloc/ticket_info/add_info_ticket_bloc.dart';
 
 void main() async {
   await init();
@@ -26,6 +28,8 @@ void main() async {
   Hive.registerAdapter(ProductDtoAdapter());
   Hive.registerAdapter(SaleItemDtoAdapter());
   Hive.registerAdapter(SaleDtoAdapter());
+  Hive.registerAdapter(TicketModelHiveAdapter());
+
   MobileAds.instance.initialize(); // Inicializa AdMob
   runApp(const MyApp());
 }
@@ -40,6 +44,7 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (_) => GetIt.instance.get<SalesBlocBloc>()),
         BlocProvider(create: (_) => GetIt.instance.get<GetSalesByDayBloc>()),
         BlocProvider(create: (_) => GetIt.instance.get<MetricsBloc>()),
+        BlocProvider(create: (_) => GetIt.instance.get<AddInfoTicketBloc>())
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

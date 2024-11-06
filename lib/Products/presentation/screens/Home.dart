@@ -156,7 +156,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 width: MediaQuery.of(context).size.width * 0.9,
                 height: 50,
                 child: ElevatedButton(
-                    child: const Text("Metricas"),
+                    child: const Text("Venta mensual"),
                     onPressed: () {
                       Navigator.pushNamed(context, '/metrics');
                     }),
