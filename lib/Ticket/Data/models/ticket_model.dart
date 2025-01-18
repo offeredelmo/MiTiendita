@@ -7,15 +7,25 @@ part 'ticket_model.g.dart';
 
 class TicketModel {
   final String companyName;
+  final String companyAddress;
 
-  TicketModel({required this.companyName});
+  TicketModel({
+    required this.companyName,
+    required this.companyAddress
+    });
   
   factory TicketModel.fromEntity(TicketEntity ticketEntity) {
-    return TicketModel(companyName: ticketEntity.companyName);
+    return TicketModel(
+      companyName: ticketEntity.companyName, 
+      companyAddress: ticketEntity.companyAddress
+      );
   }
 
   TicketEntity toEntity(){
-    return TicketEntity(companyName: companyName);
+    return TicketEntity(
+    companyName: companyName, 
+    companyAddress: companyAddress
+    );
   }
 
 }
@@ -26,17 +36,32 @@ class TicketModelHive extends HiveObject{
   @HiveField(0)
   String companyName;
 
-  TicketModelHive({required this.companyName});
+  @HiveField(1)
+  String companyAddress;
+
+  TicketModelHive({
+    required this.companyName,
+    required this.companyAddress
+    });
 
   factory TicketModelHive.fromModel(TicketModel ticketModel){
-    return TicketModelHive(companyName: ticketModel.companyName);
+    return TicketModelHive(
+      companyName: ticketModel.companyName,
+      companyAddress: ticketModel.companyAddress
+      );
   }
 
   static fromEntity(TicketEntity ticketEntity){
-    return TicketModelHive(companyName: ticketEntity.companyName);
+    return TicketModelHive(
+      companyName: ticketEntity.companyName,
+      companyAddress: ticketEntity.companyAddress
+      );
   }
   TicketEntity toEntity() {
-    return TicketEntity(companyName: companyName);
+    return TicketEntity(
+      companyName: companyName,
+      companyAddress: companyAddress
+      );
   }
 
 }

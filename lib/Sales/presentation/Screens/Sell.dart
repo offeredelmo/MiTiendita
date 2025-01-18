@@ -91,7 +91,7 @@ class _BodySellState extends State<BodySell> {
             context
                 .read<SalesBlocBloc>()
                 .add(GetTotalSales(day: DateTime.now()));
-            Navigator.pop(context);
+         
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text("Venta exitosa, sigue asi")),
             );

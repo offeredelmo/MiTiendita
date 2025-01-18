@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dartz/dartz_unsafe.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_printer/flutter_bluetooth_printer.dart';
@@ -6,6 +8,8 @@ import 'package:mi_tiendita/Sales/domain/sales.entity.dart';
 import 'package:mi_tiendita/Sales/presentation/bloc/sales/sales_bloc_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mi_tiendita/core/utils/bluethoot_service.dart';
+
+import '../../../Ticket/Presentation/Bloc/add_info_ticket_bloc.dart';
 
 class ButtonPay extends StatefulWidget {
   final double totalSell;
@@ -77,6 +81,8 @@ class _ButtonPayState extends State<ButtonPay> {
   }
 }
 
+ReceiptController? controller;
+
 class ConfirmPayModal extends StatefulWidget {
   final double totalSell;
   final List<SaleItem> listItem;
@@ -95,8 +101,6 @@ class _ConfirmPayModalState extends State<ConfirmPayModal> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   late TextEditingController controllerUserPay;
   double quantityUserPay = 0.0;
-  ReceiptController? controller;
-  final BluetoothService bluetoothService = GetIt.instance<BluetoothService>();
 
   @override
   void initState() {
@@ -141,7 +145,7 @@ class _ConfirmPayModalState extends State<ConfirmPayModal> {
                       border: OutlineInputBorder(),
                     ),
                     validator: (value) {
-                      // 1. Verificar si el valor es nulo o está vacío
+                      // 1. Verificar si el valor es nulo o está vacíoFF
                       if (value == null || value.trim().isEmpty) {
                         return 'Este campo no puede estar vacío';
                       }
@@ -193,28 +197,23 @@ class _ConfirmPayModalState extends State<ConfirmPayModal> {
                         items: widget.listItem,
                         totalsale: widget.totalSell,
                       );
-
-                      BlocProvider.of<SalesBlocBloc>(context)
-                          .add(AddSales(salesEntity: newOrder));
-
-                      if (bluetoothService.device?.address == null) {
-                        print(
-                            'La dirección del dispositivo es nula. No se puede imprimir.');
+                      final BluetoothService bluetoothService =
+                          GetIt.instance<BluetoothService>();
+                      print(bluetoothService.device);
+                      if (bluetoothService.device != null) {
+                        _dialogBuilder(
+                            context,
+                            widget.listItem,
+                            widget.totalSell,
+                            double.tryParse(controllerUserPay.text) ?? 0.0);
+                        BlocProvider.of<SalesBlocBloc>(context)
+                            .add(AddSales(salesEntity: newOrder));
                       } else {
-                        print(bluetoothService.device!.address);
-                        controller?.print(
-                            address: bluetoothService.device!.address);
+                        BlocProvider.of<SalesBlocBloc>(context)
+                            .add(AddSales(salesEntity: newOrder));
+                        Navigator.pop(context);
+                        Navigator.pop(context);
                       }
-
-                      Navigator.pop(context); // Cerrar el modal
-
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                              'Venta realizada con éxito. Cambio: \$${(quantityUserPay - widget.totalSell).toStringAsFixed(2)}'),
-                          backgroundColor: Colors.green,
-                        ),
-                      );
                     }
                   },
                   child: const Text('Confirmar Pago'),
@@ -229,34 +228,115 @@ class _ConfirmPayModalState extends State<ConfirmPayModal> {
   }
 }
 
-Widget build(BuildContext context, SalesEntity sale) {
-  ReceiptController? controller;
-  double printerWidth = 58 * 2.83465; // configuracion de la impresora 
-   
+Widget ticket(BuildContext context, List<SaleItem> sale, double total,
+    double pay, String companyName, String address) {
+  final dateNow = DateTime.now();
   return Receipt(
-    builder: (context) => Column(
-      children: [
-        const Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [Text("Nombre de la empresa")],
+    builder: (context) =>
+        Column(mainAxisAlignment: MainAxisAlignment.start, children: [
+      Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [Text(companyName, style: const TextStyle(fontSize: 24))],
+      ),
+      const SizedBox(height: 10),
+      Text(
+        address,
+        style: TextStyle(fontSize: 24),
+      ),
+      Text('Fecha: ${dateNow.year}/${dateNow.month}/${dateNow.day}',
+          style: const TextStyle(fontSize: 24)),
+      const Text('------------------------', style: TextStyle(fontSize: 24)),
+      const Text("Lista de productos", style: TextStyle(fontSize: 24)),
+      for (final item in sale)
+        Row(
+          children: [
+            Text(
+                "${item.product.name}:\n${item.quantity} x ${item.product.price} = ${item.product.price * item.quantity}",
+                style: const TextStyle(fontSize: 24)),
+          ],
         ),
-        const SizedBox(height: 10),
-        const Text('Direccion: Primera oriente numero 12'),
-        Text('Fecha: ${DateTime.now()}'),
-        const Text('--------------------------'),
-        Text("Cantidad -- Producto      -- PRE.UNIT --  Total "),
-        for (final item in sale.items)
-          Row(
-            children: [
-              SizedBox(child: Text("${item.quantity}")),
-              Text("${item.product.name}"),
-              Text("${item.product.price}" ),
-            ],
-          )
-      ],
-    ),
-    onInitialized: (ctrl) {
-      controller = ctrl;
+      const SizedBox(
+        height: 10,
+      ),
+      Text("Total: $total", style: const TextStyle(fontSize: 24)),
+      Text("Recibo: $pay", style: const TextStyle(fontSize: 24)),
+      Text("Cambio: ${pay - total}", style: const TextStyle(fontSize: 24))
+    ]),
+    onInitialized: (ReceiptController controllerr) {
+      controller = controllerr;
+    },
+  );
+}
+
+Future<void> _dialogBuilder(
+    BuildContext context, List<SaleItem> sale, double totalSale, double pay) {
+  final BluetoothService bluetoothService = GetIt.instance<BluetoothService>();
+  return showDialog<void>(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text('Deseas Imprimir el ticket'),
+        content: BlocBuilder<AddInfoTicketBloc, AddInfoTicketState>(
+            builder: (context, state) {
+          if (state is GetInfoTicketLoading) {
+            return const Text("Elaborando Ticket....");
+          } else if (state is GetInfoTicketSuccess) {
+            return SizedBox(
+              height: 200,
+              child: Column(
+                children: [
+                  const Text(
+                      'Si quieres imprimir el ticket dale click a IMPRIMIR\n'
+                      '\n'
+                      'Si no deseas imprimir el ticket dale click a NO IMPRIMIR\n'),
+                  SizedBox(
+                    height: 1,
+                    child: ticket(
+                        context,
+                        sale,
+                        totalSale,
+                        pay,
+                        state.ticketEntity.companyName,
+                        state.ticketEntity.companyAddress),
+                  )
+                ],
+              ),
+            );
+          } else {
+            return const Text("Lo siento no fue posible imprimir el ticket");
+          }
+        }),
+        actions: <Widget>[
+          TextButton(
+            style: TextButton.styleFrom(
+              textStyle: Theme.of(context).textTheme.labelLarge,
+            ),
+            child: const Text('No imprimir'),
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.pop(context);
+              Navigator.pop(context);
+            },
+          ),
+          TextButton(
+            style: TextButton.styleFrom(
+              textStyle: Theme.of(context).textTheme.labelLarge,
+            ),
+            child: const Text('Imprimir'),
+            onPressed: () async {
+              Navigator.pop(context);
+              Navigator.pop(context);
+              Navigator.pop(context);
+              if (controller != null) {
+                try {
+                  await controller!
+                      .print(address: bluetoothService.device!.address);
+                } catch (e) {}
+              } else {}
+            },
+          ),
+        ],
+      );
     },
   );
 }

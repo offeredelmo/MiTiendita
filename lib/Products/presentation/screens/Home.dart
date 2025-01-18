@@ -10,6 +10,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:mi_tiendita/Products/domain/entities.dart';
 import 'package:mi_tiendita/Products/presentation/bloc/products_bloc.dart';
 import 'package:mi_tiendita/core/utils/bluethoot_service.dart';
+import 'package:mi_tiendita/expenses/presentation/block/get_expenses_by_month_bloc.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
@@ -23,10 +24,13 @@ class _MyHomePageState extends State<MyHomePage> {
   bool _isBannerAdReady = false;
   BluetoothDevice? actualDevice;
   final BluetoothService bluetoothService = GetIt.instance<BluetoothService>();
+
   @override
   void initState() {
     super.initState();
     context.read<SalesBlocBloc>().add(GetTotalSales(day: DateTime.now()));
+    context.read<GetTotalExpensesByMonthBloc>().add(GetExpensesByMonthEvent(
+        date: DateTime.now())); // Inicia la petición de gastos
 
     _bannerAd = BannerAd(
       adUnitId: 'ca-app-pub-2901258575619881/7507827726', // Tu Ad Unit ID aquí
@@ -63,112 +67,119 @@ class _MyHomePageState extends State<MyHomePage> {
             ValueListenableBuilder<bool>(
               valueListenable: bluetoothService.isConnectedNotifier,
               builder: (context, isConnected, child) {
-                  return IconButton(
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/print');
-                  
-                  },
-                  icon: bluetoothService.device != null?
-                    Icon(Icons.print, color: Colors.green,) : 
-                    Icon(Icons.print_disabled, color: Colors.red,)
-                  );
+                return IconButton(
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/print');
+                    },
+                    icon: bluetoothService.device != null
+                        ? Icon(
+                            Icons.print,
+                            color: Colors.green,
+                          )
+                        : Icon(
+                            Icons.print_disabled,
+                            color: Colors.red,
+                          ));
               },
-            
             )
           ],
         ),
-        body: Center(
-          child: Column(
+        body: SingleChildScrollView(
+          child: Stack(
             children: [
-              SizedBox(
-                width: MediaQuery.of(context).size.width * 0.9,
-                height: 50,
-                child: ElevatedButton(
-                    child: const Text("Relaizar venta"),
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/sell');
-                    }),
-              ),
-              const SizedBox(height: 10),
-              SizedBox(
-                width: MediaQuery.of(context).size.width * 0.9,
-                height: 50,
-                child: ElevatedButton(
-                    child: const Text("Ver mis ventas"),
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/sales');
-                    }),
-              ),
-              const SizedBox(height: 10),
-              SizedBox(
-                width: MediaQuery.of(context).size.width * 0.9,
-                height: 50,
-                child: ElevatedButton(
-                    child: const Text("Ver mis productos"),
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/products');
-                    }),
-              ),
-              const SizedBox(height: 10),
-              SizedBox(
-                width: MediaQuery.of(context).size.width * 0.9,
-                height: 50,
-                child: ElevatedButton(
-                    child: const Text("Agregar un nuevo producto"),
-                    onPressed: () {
-                      _modalAddProduct(context);
-                    }),
-              ),
-              const SizedBox(height: 10),
-              BlocBuilder<SalesBlocBloc, SalesBlocState>(
-                  builder: (context, state) {
-                String totalSalesText = "Cargando...";
-                if (state is SalesGetTotalSalesSucces) {
-                  totalSalesText = "Venta total: ${state.totalSales}";
-                } else if (state is SalesGetTotalSalesFailure) {
-                  totalSalesText = "Error al obtener ventas totales.";
-                }
-
-                return Center(
-                  child: Column(
-                    children: [
-                      // ... (Otros widgets como botones)
-                      SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.9,
-                        height: 80,
-                        child: Card(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                  "Fecha: ${DateTime.now().month} / ${DateTime.now().day} / ${DateTime.now().year}"),
-                              Text(totalSalesText),
-                            ],
-                          ),
+              Container(
+                height: MediaQuery.of(context).size.height * 0.9 -
+                    AppBar().preferredSize.height,
+                width: MediaQuery.of(context).size.width * 1,
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      children: [
+                        //BOTTON PARA REALIZAR UNA VENTA
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width * 0.9,
+                          height: 50,
+                          child: ElevatedButton(
+                              child: const Text("Realizar una venta"),
+                              onPressed: () {
+                                Navigator.pushNamed(context, '/sell');
+                              }),
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 10),
+                        //BOTTON PARA VER LAS VENTAS
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width * 0.9,
+                          height: 50,
+                          child: ElevatedButton(
+                              child: const Text("Ver mis ventas"),
+                              onPressed: () {
+                                Navigator.pushNamed(context, '/sales');
+                              }),
+                        ),
+                        const SizedBox(height: 10),
+                        //BOTTON PARA VER LAS VENTAS MENSUALES
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width * 0.9,
+                          height: 50,
+                          child: ElevatedButton(
+                              child: const Text("Venta mensual"),
+                              onPressed: () {
+                                Navigator.pushNamed(context, '/metrics');
+                              }),
+                        ),
+                        const SizedBox(height: 20),
+                        //WIDGET PARA VER LA VENTA TOTAL DEL DIA
+                        CardViewTotalSellToDay(),
+                        const SizedBox(height: 20),
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width * 0.9,
+                          height: 50,
+                          child: ElevatedButton(
+                              child: const Text("Agregar un nuevo producto"),
+                              onPressed: () {
+                                _modalAddProduct(context);
+                              }),
+                        ),
+                        const SizedBox(height: 10),
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width * 0.9,
+                          height: 50,
+                          child: ElevatedButton(
+                              child: const Text("Ver mis productos"),
+                              onPressed: () {
+                                Navigator.pushNamed(context, '/products');
+                              }),
+                        ),
+                        const SizedBox(height: 10),
+                        Text("Gastos"),
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width * 0.9,
+                          height: 50,
+                          child: ElevatedButton(
+                              child: const Text("Ver mis gastos"),
+                              onPressed: () {
+                                Navigator.pushNamed(context, '/expenses');
+                              }),
+                        ),
+                        //WIDGET PARA VER EL GASTO TOTAL DEL MES
+                        CardViewTotalExpensByMonth()
+                      ],
+                    ),
                   ),
-                );
-              }),
-              const SizedBox(height: 10),
-              SizedBox(
-                width: MediaQuery.of(context).size.width * 0.9,
-                height: 50,
-                child: ElevatedButton(
-                    child: const Text("Venta mensual"),
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/metrics');
-                    }),
-              ),
-              const SizedBox(height: 20),
-              const Spacer(),
-              if (_isBannerAdReady)
-                SizedBox(
-                  width: _bannerAd.size.width.toDouble(),
-                  height: _bannerAd.size.height.toDouble(),
-                  child: AdWidget(ad: _bannerAd),
                 ),
+              ),
+              if (_isBannerAdReady)
+                Positioned(
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  child: SizedBox(
+                    width: _bannerAd.size.width.toDouble(),
+                    height: _bannerAd.size.height.toDouble(),
+                    child: AdWidget(ad: _bannerAd),
+                  ),
+                )
             ],
           ),
         ),
@@ -291,6 +302,7 @@ class _MyHomePageState extends State<MyHomePage> {
                               decoration: const InputDecoration(
                                 border: OutlineInputBorder(),
                                 labelText: "Cantidad",
+                                helperText: "Opccional",
                               ),
                               onChanged: (value) {
                                 setState(() {
@@ -309,7 +321,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           decoration: const InputDecoration(
                               border: OutlineInputBorder(),
                               labelText: "Codigo de barras",
-                              helperText: "opccional"),
+                              helperText: "Opcional"),
                           onChanged: (value) {
                             setState(() {
                               _barCode = value;
@@ -371,5 +383,98 @@ class _MyHomePageState extends State<MyHomePage> {
         );
       },
     );
+  }
+}
+
+class CardViewTotalExpensByMonth extends StatelessWidget {
+  CardViewTotalExpensByMonth({
+    super.key,
+  });
+
+  final List<String> months = [
+    "Enero",
+    "Febrero",
+    "Marzo",
+    "Abril",
+    "Mayo",
+    "Junio",
+    "Julio",
+    "Agosto",
+    "Septiembre",
+    "Octubre",
+    "Noviembre",
+    "Diciembre"
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<GetTotalExpensesByMonthBloc, GetExpensesByMonthState>(
+      builder: (context, state) {
+        String? response;
+
+        if (state is GetTotalExpensesByMonthLoading) {
+          response = "Calculando gastos...";
+        }
+        if (state is GetTotalExpensesByMonthSuccess) {
+          response = state.expenses.toString();
+        }
+        if (state is GetTotalExpensesByMonthError) {
+          response = "Error al obtener gastos.";
+        }
+        return SizedBox(
+          width: MediaQuery.of(context).size.width * 0.9,
+          height: 80,
+          child: Card(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(months[DateTime.now().month - 1]),
+                Text("Total gastado : ${response}"),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class CardViewTotalSellToDay extends StatelessWidget {
+  const CardViewTotalSellToDay({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<SalesBlocBloc, SalesBlocState>(
+        builder: (context, state) {
+      String totalSalesText = "Cargando...";
+      if (state is SalesGetTotalSalesSucces) {
+        totalSalesText = "Venta total: ${state.totalSales}";
+      } else if (state is SalesGetTotalSalesFailure) {
+        totalSalesText = "Error al obtener ventas totales.";
+      }
+      return Center(
+        child: Column(
+          children: [
+            // ... (Otros widgets como botones)
+            SizedBox(
+              width: MediaQuery.of(context).size.width * 0.9,
+              height: 80,
+              child: Card(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                        "Fecha: ${DateTime.now().month} / ${DateTime.now().day} / ${DateTime.now().year}"),
+                    Text(totalSalesText),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    });
   }
 }

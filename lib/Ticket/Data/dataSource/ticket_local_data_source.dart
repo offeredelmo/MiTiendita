@@ -18,15 +18,16 @@ class TicketLocalDataSourceImpl implements TicketLocalDataSource {
   Future<TicketEntity> getInfoCompany() async {
     try {
       final box = await Hive.openBox<TicketModelHive>(_boxName);
-      final getConfigurations =  box.get(idConfigiration);
+      final getConfigurations = box.get(idConfigiration);
       if (getConfigurations == null) {
-        return TicketEntity(companyName: "Ejemplo");
+        //si la configuracion no existe, retornamos un objeto vacio, esto es para la primera vez
+        return TicketEntity(companyName: "", companyAddress: "");
       }
       {
+        //Si la configuracion existe, la retornamos
         return getConfigurations.toEntity();
       }
     } catch (e) {
-      print(e);
       throw LocalFailure();
     }
   }
@@ -34,22 +35,24 @@ class TicketLocalDataSourceImpl implements TicketLocalDataSource {
   @override
   Future<TicketEntity> updateInfoTicket(TicketEntity ticketEntity) async {
     try {
-
       final box = await Hive.openBox<TicketModelHive>(_boxName);
-      final getConfigurations =  box.get(idConfigiration);
+      final getConfigurations = box.get(idConfigiration);
 
       if (getConfigurations == null) {
-        final newTicketConfig = TicketModelHive.fromEntity(ticketEntity);
+        // Si no existe la configuracion, la creamos. esto es para la primera vez
+        final TicketModelHive newTicketConfig =
+            await TicketModelHive.fromEntity(ticketEntity);
         await box.put(idConfigiration, newTicketConfig);
-        return newTicketConfig;
+        return ticketEntity;
       } else {
+        //si existe la configuracion, la actualizamos
         getConfigurations.companyName = ticketEntity.companyName;
+        getConfigurations.companyAddress = ticketEntity.companyAddress;
         await getConfigurations.save();
         return getConfigurations.toEntity();
       }
       // Otros procesos o retornos si necesitas
     } catch (e) {
-      print("error: ${e}");
       throw LocalFailure();
     }
   }

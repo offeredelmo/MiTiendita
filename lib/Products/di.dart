@@ -1,4 +1,3 @@
-
 import 'package:mi_tiendita/Sales/domain/use_case/get_total_sale_by_day.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mi_tiendita/Products/data/dataSorce/product_local_data_source.dart';
@@ -10,7 +9,6 @@ import 'package:mi_tiendita/Products/domain/use_case/get_products.dart';
 import 'package:mi_tiendita/Products/domain/use_case/update_product.dart';
 import 'package:mi_tiendita/Products/presentation/bloc/products_bloc.dart';
 
-
 import 'package:mi_tiendita/Sales/data/dataDorce/sales_local_data_source.dart';
 import 'package:mi_tiendita/Sales/domain/sales.repository.dart';
 import 'package:mi_tiendita/Sales/domain/use_case/add_sale.dart';
@@ -20,6 +18,8 @@ import 'package:mi_tiendita/Ticket/Data/dataSource/ticket_local_data_source.dart
 import 'package:mi_tiendita/Ticket/Data/repository/ticket_repository_impl.dart';
 import 'package:mi_tiendita/Ticket/Domain/ticket.repository.dart';
 import 'package:mi_tiendita/core/utils/bluethoot_service.dart';
+import 'package:mi_tiendita/expenses/data/dataSource/expense_local_datasorce.dart';
+import 'package:mi_tiendita/expenses/domain/expense_repository.dart';
 
 import '../Sales/data/repository/sales_repository_impl.dart';
 import '../Sales/domain/use_case/get_sale_by_day.dart';
@@ -28,13 +28,20 @@ import '../Sales/presentation/bloc/bloc_get_orders/get_sales_by_day_bloc.dart';
 import '../Sales/presentation/bloc/metrics/metrics_bloc.dart';
 import '../Ticket/Domain/use_case/get_info_ticket.dart';
 import '../Ticket/Domain/use_case/update_info_ticket.dart';
-import '../Ticket/Presentation/Bloc/ticket_info/add_info_ticket_bloc.dart';
-
+import '../Ticket/Presentation/Bloc/add_info_ticket_bloc.dart';
+import '../expenses/data/repository/expense_repository_implement.dart';
+import '../expenses/domain/use_case/create_expense_use_case.dart';
+import '../expenses/domain/use_case/delete_expense_by_id_use_case.dart';
+import '../expenses/domain/use_case/get_expenses_use_case.dart';
+import '../expenses/domain/use_case/get_total_expense_by_month_usecase.dart';
+import '../expenses/presentation/block/delete_expense_by_id_bloc.dart';
+import '../expenses/presentation/block/create_expense_bloc.dart';
+import '../expenses/presentation/block/get_expense.dart';
+import '../expenses/presentation/block/get_expenses_by_month_bloc.dart';
 
 final di = GetIt.instance;
 
-Future<void> init() async{
-
+Future<void> init() async {
   di.registerSingleton<BluetoothService>(BluetoothService());
 
   //bloc   PRODUCTS
@@ -47,10 +54,12 @@ Future<void> init() async{
   di.registerLazySingleton(() => UpdateProductUseCase(repository: di()));
 
   //repository
-  di.registerLazySingleton<ProductsRepository>(() => ProductsRepositoryImpl(productsLocalDataSource: di()));
+  di.registerLazySingleton<ProductsRepository>(
+      () => ProductsRepositoryImpl(productsLocalDataSource: di()));
 
   //data source
-  di.registerLazySingleton<ProductsLocalDataSource>(() => ProductsLocalDataSourceImpl());
+  di.registerLazySingleton<ProductsLocalDataSource>(
+      () => ProductsLocalDataSourceImpl());
 
   //bloc SELLLS
   di.registerFactory(() => SalesBlocBloc(di(), di()));
@@ -64,12 +73,13 @@ Future<void> init() async{
   di.registerLazySingleton(() => GetSaleByMonthUseCase(repository: di()));
   di.registerLazySingleton(() => GetTotalSaleUseCase(repository: di()));
 
-  
   //repository
-  di.registerLazySingleton<SalesRepository>(() => SaleRepositoryImpl(saleLocalDataSource: di()));
-  
+  di.registerFactory<SalesRepository>(
+      () => SaleRepositoryImpl(saleLocalDataSource: di()));
+
   //data source
-  di.registerLazySingleton<SaleLocalDataSource>(() => SaleLocalDatasourceImpl());
+  di.registerLazySingleton<SaleLocalDataSource>(
+      () => SaleLocalDatasourceImpl());
 
   // block Ticket
   di.registerLazySingleton(() => AddInfoTicketBloc(di(), di()));
@@ -79,9 +89,32 @@ Future<void> init() async{
   di.registerLazySingleton(() => GetInfoTicketUseCase(repository: di()));
 
   //repository
-  di.registerLazySingleton<TicketRepository>(() => TicketRepositoryImpl(ticketLocalDataSource: di()));
+  di.registerLazySingleton<TicketRepository>(
+      () => TicketRepositoryImpl(ticketLocalDataSource: di()));
 
   //data source
-  di.registerLazySingleton<TicketLocalDataSource>(() => TicketLocalDataSourceImpl());
+  di.registerLazySingleton<TicketLocalDataSource>(
+      () => TicketLocalDataSourceImpl());
 
+  //EXPENSES
+  //bloc
+  di.registerLazySingleton(() => GetExpensesBloc(di()));
+  di.registerLazySingleton(() => CreateExpenseBloc(di()));
+  di.registerLazySingleton(() => DeleteExpenseByIdBloc(di()));
+  di.registerLazySingleton(() => GetTotalExpensesByMonthBloc(di()));
+
+  //useCase
+  di.registerLazySingleton(() => GetExpensesUseCase(repository: di()));
+  di.registerLazySingleton(() => CreateExpenseUseCase(repository: di()));
+  di.registerLazySingleton(() => DeleteExpenseByIdUseCase(repository: di()));
+  di.registerLazySingleton(
+      () => GetTotalExpenseByMonthUsecase(repository: di()));
+
+  //repository
+  di.registerLazySingleton<ExpenseRepository>(
+      () => ExpenseRepositoryImplement(expenseLocalDatasorce: di()));
+
+  //data source
+  di.registerLazySingleton<ExpenseLocalDatasorce>(
+      () => ExpenseLocalDatasorceImplement());
 }

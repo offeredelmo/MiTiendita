@@ -5,7 +5,7 @@ import 'package:get_it/get_it.dart';
 import 'package:mi_tiendita/Ticket/Domain/ticket.entity.dart';
 import 'package:mi_tiendita/core/utils/bluethoot_service.dart';
 
-import '../Bloc/ticket_info/add_info_ticket_bloc.dart';
+import '../Bloc/add_info_ticket_bloc.dart';
 
 class PrintScreen extends StatelessWidget {
   const PrintScreen({super.key});
@@ -40,8 +40,11 @@ class _BodyPrintScreenState extends State<BodyPrintScreen> {
   final _printconfig = GlobalKey<FormState>();
 
   final TextEditingController _controllerCompanyName = TextEditingController();
+  final TextEditingController _controllerAddress = TextEditingController();
 
-  final focusNode = FocusNode();
+  final focusNodecompanyName = FocusNode();
+  final focusNodecompanyAddress = FocusNode();
+
 
   final BluetoothService bluetoothService = GetIt.instance<BluetoothService>();
 
@@ -63,36 +66,67 @@ class _BodyPrintScreenState extends State<BodyPrintScreen> {
         BlocConsumer<AddInfoTicketBloc, AddInfoTicketState>(
             listener: (context, state) => {},
             builder: (context, state) {
+              print("STATE: $state");
               if (state is GetInfoTicketLoading) {
                 return const Text("Cargando configuracion");
               } else if (state is GetInfoTicketSuccess) {
-                print(state.ticketEntity.companyName);
-                 _controllerCompanyName.text = state.ticketEntity.companyName;
+                _controllerCompanyName.text = state.ticketEntity.companyName;
+                _controllerAddress.text = state.ticketEntity.companyAddress;
+
                 return Form(
                     key: _printconfig,
                     child: Center(
                       child: Column(
                         children: [
                           SizedBox(
-                            width: MediaQuery.of(context).size.width * 0.9,
-                            child: TextFormField(
-                              controller: _controllerCompanyName,
-                              onTapOutside: (event) {
-                                focusNode.unfocus();
-                              },
-                              focusNode: focusNode,
-                              decoration: const InputDecoration(
-                                  label: Text("nombre de la compañia"),
-                                  border: OutlineInputBorder(
-                                      borderRadius:
-                                          BorderRadius.all(Radius.circular(2))),
-                                  helper: Text(
-                                      "Agrega el nombre de tu empresa para que salga en el ticket")),
-                            ),
-                          ),
+                              width: MediaQuery.of(context).size.width * 0.9,
+                              child: Column(
+                                children: [
+                                  //INPUT PARA EL NOMBRE DE LA EMPRESA
+                                  TextFormField(
+                                    controller: _controllerCompanyName,
+                                    onTapOutside: (event) {
+                                      focusNodecompanyName.unfocus();
+                                    },
+                                    focusNode: focusNodecompanyName,
+                                    decoration: const InputDecoration(
+                                        label: Text("Nombre del negocio"),
+                                        border: OutlineInputBorder(
+                                            borderRadius: BorderRadius.all(
+                                                Radius.circular(2))),
+                                        helper: Text(
+                                            "Agrega el nombre de tu empresa")),
+                                  ),
+                                  const SizedBox(
+                                    height: 15,
+                                  ),
+
+                                  //INPUT PARA LA DIRECCION DE LA EMPRESA
+                                  TextFormField(
+                                    controller: _controllerAddress,
+                                    onTapOutside: (event) {
+                                      focusNodecompanyAddress.unfocus();
+                                    },
+                                    focusNode: focusNodecompanyAddress,
+                                    decoration: const InputDecoration(
+                                        label: Text("Direccion del negocio"),
+                                        border: OutlineInputBorder(
+                                            borderRadius: BorderRadius.all(
+                                                Radius.circular(2))),
+                                        helper: Text(
+                                            "Agrega la direccion de la empresa")),
+                                  ),
+                                ],
+                              )),
+                          //BOTON PARA GUARDAR LOS DATOS
                           ElevatedButton(
                               onPressed: () {
-                                context.read<AddInfoTicketBloc>().add(UpdateInfoTicket(ticketEntity: TicketEntity(companyName: _controllerCompanyName.text)));
+                                final infoTicket = TicketEntity(
+                                    companyName: _controllerCompanyName.text,
+                                    companyAddress: _controllerAddress.text
+                                    );
+                                BlocProvider.of<AddInfoTicketBloc>(context).add(
+                                    UpdateInfoTicket(ticketEntity: infoTicket));
                               },
                               child: const Text("Guardar Datos"))
                         ],
@@ -103,6 +137,8 @@ class _BodyPrintScreenState extends State<BodyPrintScreen> {
                     "A ocurrido un error mandanos correo a @ explicandonos tu problema para intentar solucionarlo");
               }
             }),
+
+        //BOTON PARA CONECTAR LA IMPRESORA
         ElevatedButton(
           child: const Text('Seleccionar e una impresora'),
           onPressed: () async {
