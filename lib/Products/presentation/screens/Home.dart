@@ -56,6 +56,27 @@ class _MyHomePageState extends State<MyHomePage> {
     super.dispose();
   }
 
+  //Metodos para obtener el gasto total del mes
+  DateTime actuallyMonth = DateTime.now();
+  decrementMoth(DateTime date) {
+    actuallyMonth = actuallyMonth.month - 1 == 0
+        ? DateTime(actuallyMonth.year - 1, 12)
+        : DateTime(actuallyMonth.year, actuallyMonth.month - 1);
+    context
+        .read<GetTotalExpensesByMonthBloc>()
+        .add(GetExpensesByMonthEvent(date: actuallyMonth));
+    setState(() {});
+  }
+  incrementMoth(DateTime date) {
+    actuallyMonth = actuallyMonth.month + 1 == 13
+        ? DateTime(actuallyMonth.year + 1, 1)
+        : DateTime(actuallyMonth.year, actuallyMonth.month + 1);
+    context
+        .read<GetTotalExpensesByMonthBloc>()
+        .add(GetExpensesByMonthEvent(date: actuallyMonth));
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
@@ -163,7 +184,11 @@ class _MyHomePageState extends State<MyHomePage> {
                               }),
                         ),
                         //WIDGET PARA VER EL GASTO TOTAL DEL MES
-                        CardViewTotalExpensByMonth()
+                        CardViewTotalExpensByMonth(
+                            decrementMoth: decrementMoth,
+                            incrementMoth: incrementMoth,
+                            actuallyMonth: actuallyMonth,
+                        )
                       ],
                     ),
                   ),
@@ -253,6 +278,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         child: TextFormField(
                           decoration: const InputDecoration(
                             border: OutlineInputBorder(),
+                            helperText: "necesario",
                             labelText: "Nombre del producto",
                           ),
                           validator: (value) {
@@ -278,6 +304,7 @@ class _MyHomePageState extends State<MyHomePage> {
                               keyboardType: TextInputType.number,
                               decoration: const InputDecoration(
                                 border: OutlineInputBorder(),
+                                helperText: "necesario",
                                 labelText: "Precio",
                               ),
                               validator: (value) {
@@ -389,8 +416,13 @@ class _MyHomePageState extends State<MyHomePage> {
 class CardViewTotalExpensByMonth extends StatelessWidget {
   CardViewTotalExpensByMonth({
     super.key,
+    required this.decrementMoth,
+    required this.incrementMoth,
+    required this.actuallyMonth,
   });
-
+  final Function(DateTime) decrementMoth;
+  final Function(DateTime) incrementMoth;
+  final DateTime actuallyMonth;
   final List<String> months = [
     "Enero",
     "Febrero",
@@ -411,7 +443,7 @@ class CardViewTotalExpensByMonth extends StatelessWidget {
     return BlocBuilder<GetTotalExpensesByMonthBloc, GetExpensesByMonthState>(
       builder: (context, state) {
         String? response;
-
+        
         if (state is GetTotalExpensesByMonthLoading) {
           response = "Calculando gastos...";
         }
@@ -423,12 +455,28 @@ class CardViewTotalExpensByMonth extends StatelessWidget {
         }
         return SizedBox(
           width: MediaQuery.of(context).size.width * 0.9,
-          height: 80,
+          height: 100,
           child: Card(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(months[DateTime.now().month - 1]),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    IconButton(
+                        onPressed: () {
+                          decrementMoth(actuallyMonth);
+                        },
+                        icon: Icon(Icons.arrow_back_rounded)),
+                    Text(
+                        "${months[actuallyMonth.month - 1]} - ${actuallyMonth.year}"),
+                    IconButton(
+                        onPressed: () {
+                          incrementMoth(actuallyMonth);
+                        },
+                        icon: Icon(Icons.arrow_forward_rounded)),
+                  ],
+                ),
                 Text("Total gastado : ${response}"),
               ],
             ),
