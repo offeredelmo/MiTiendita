@@ -7,6 +7,7 @@ import 'package:mi_tiendita/Products/presentation/bloc/products_bloc.dart';
 import 'package:mi_tiendita/Sales/domain/sales.entity.dart';
 import 'package:mi_tiendita/Sales/presentation/Widget/buttonPay.widget.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 
 import '../bloc/sales/sales_bloc_bloc.dart';
 
@@ -24,11 +25,20 @@ class _SellScreenState extends State<SellScreen> {
     context.read<ProductsBloc>().add(GetProducts());
   }
 
+  Future<void> startBarcodeScanStream() async {
+    FlutterBarcodeScanner.getBarcodeStreamReceiver(
+            '#ff6666', 'Cancel', true, ScanMode.BARCODE)!
+        .listen((barcode) => print(barcode));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Mi tiendita"),
+        actions: [
+          IconButton(onPressed: (){ startBarcodeScanStream();}, icon: Icon(Icons.document_scanner_outlined))
+        ],
       ),
       body: GestureDetector(
           behavior: HitTestBehavior.opaque,
@@ -91,7 +101,7 @@ class _BodySellState extends State<BodySell> {
             context
                 .read<SalesBlocBloc>()
                 .add(GetTotalSales(day: DateTime.now()));
-         
+
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text("Venta exitosa, sigue asi")),
             );

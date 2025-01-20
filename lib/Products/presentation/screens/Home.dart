@@ -67,6 +67,7 @@ class _MyHomePageState extends State<MyHomePage> {
         .add(GetExpensesByMonthEvent(date: actuallyMonth));
     setState(() {});
   }
+
   incrementMoth(DateTime date) {
     actuallyMonth = actuallyMonth.month + 1 == 13
         ? DateTime(actuallyMonth.year + 1, 1)
@@ -105,108 +106,105 @@ class _MyHomePageState extends State<MyHomePage> {
             )
           ],
         ),
-        body: SingleChildScrollView(
-          child: Stack(
-            children: [
-              Container(
-                height: MediaQuery.of(context).size.height * 0.9 -
-                    AppBar().preferredSize.height,
-                width: MediaQuery.of(context).size.width * 1,
-                child: Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Column(
-                      children: [
-                        //BOTTON PARA REALIZAR UNA VENTA
-                        SizedBox(
-                          width: MediaQuery.of(context).size.width * 0.9,
-                          height: 50,
-                          child: ElevatedButton(
-                              child: const Text("Realizar una venta"),
-                              onPressed: () {
-                                Navigator.pushNamed(context, '/sell');
-                              }),
-                        ),
-                        const SizedBox(height: 10),
-                        //BOTTON PARA VER LAS VENTAS
-                        SizedBox(
-                          width: MediaQuery.of(context).size.width * 0.9,
-                          height: 50,
-                          child: ElevatedButton(
-                              child: const Text("Ver mis ventas"),
-                              onPressed: () {
-                                Navigator.pushNamed(context, '/sales');
-                              }),
-                        ),
-                        const SizedBox(height: 10),
-                        //BOTTON PARA VER LAS VENTAS MENSUALES
-                        SizedBox(
-                          width: MediaQuery.of(context).size.width * 0.9,
-                          height: 50,
-                          child: ElevatedButton(
-                              child: const Text("Venta mensual"),
-                              onPressed: () {
-                                Navigator.pushNamed(context, '/metrics');
-                              }),
-                        ),
-                        const SizedBox(height: 20),
-                        //WIDGET PARA VER LA VENTA TOTAL DEL DIA
-                        CardViewTotalSellToDay(),
-                        const SizedBox(height: 20),
-                        SizedBox(
-                          width: MediaQuery.of(context).size.width * 0.9,
-                          height: 50,
-                          child: ElevatedButton(
-                              child: const Text("Agregar un nuevo producto"),
-                              onPressed: () {
-                                _modalAddProduct(context);
-                              }),
-                        ),
-                        const SizedBox(height: 10),
-                        SizedBox(
-                          width: MediaQuery.of(context).size.width * 0.9,
-                          height: 50,
-                          child: ElevatedButton(
-                              child: const Text("Ver mis productos"),
-                              onPressed: () {
-                                Navigator.pushNamed(context, '/products');
-                              }),
-                        ),
-                        const SizedBox(height: 10),
-                        Text("Gastos"),
-                        SizedBox(
-                          width: MediaQuery.of(context).size.width * 0.9,
-                          height: 50,
-                          child: ElevatedButton(
-                              child: const Text("Ver mis gastos"),
-                              onPressed: () {
-                                Navigator.pushNamed(context, '/expenses');
-                              }),
-                        ),
-                        //WIDGET PARA VER EL GASTO TOTAL DEL MES
-                        CardViewTotalExpensByMonth(
-                            decrementMoth: decrementMoth,
-                            incrementMoth: incrementMoth,
-                            actuallyMonth: actuallyMonth,
-                        )
-                      ],
+        body: Stack(
+          children: [
+            SingleChildScrollView(
+              padding: EdgeInsets.symmetric(horizontal: 10),
+              child: Padding(
+                padding: EdgeInsets.only(bottom: _bannerAd.size.height.toDouble()            ),
+                child: Column(
+                  children: [
+                    //BOTTON PARA REALIZAR UNA VENTA
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.9,
+                      height: 50,
+                      child: ElevatedButton(
+                          child: const Text("Realizar una venta"),
+                          onPressed: () {
+                            Navigator.pushNamed(context, '/sell');
+                          }),
                     ),
-                  ),
+                    const SizedBox(height: 10),
+                    //BOTTON PARA VER LAS VENTAS
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.9,
+                      height: 50,
+                      child: ElevatedButton(
+                          child: const Text("Ver mis ventas"),
+                          onPressed: () {
+                            Navigator.pushNamed(context, '/sales');
+                          }),
+                    ),
+                    const SizedBox(height: 10),
+                    //BOTTON PARA VER LAS VENTAS MENSUALES
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.9,
+                      height: 50,
+                      child: ElevatedButton(
+                          child: const Text("Venta mensual"),
+                          onPressed: () {
+                            Navigator.pushNamed(context, '/metrics');
+                          }),
+                    ),
+                    const SizedBox(height: 20),
+                    //WIDGET PARA VER LA VENTA TOTAL DEL DIA
+                    CardViewTotalSellToDay(),
+                    const SizedBox(height: 20),
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.9,
+                      height: 50,
+                      child: ElevatedButton(
+                          child: const Text("Agregar un nuevo producto"),
+                          onPressed: () {
+                            _modalAddProduct(context);
+                          }),
+                    ),
+                    const SizedBox(height: 10),
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.9,
+                      height: 50,
+                      child: ElevatedButton(
+                          child: const Text("Ver mis productos"),
+                          onPressed: () {
+                            Navigator.pushNamed(context, '/products');
+                          }),
+                    ),
+                    const SizedBox(height: 10),
+                    Text("Gastos"),
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.9,
+                      height: 50,
+                      child: ElevatedButton(
+                          child: const Text("Ver mis gastos"),
+                          onPressed: () {
+                            Navigator.pushNamed(context, '/expenses');
+                          }),
+                    ),
+                    const SizedBox(height: 10),
+                            
+                    //WIDGET PARA VER EL GASTO TOTAL DEL MES
+                    CardViewTotalExpensByMonth(
+                      decrementMoth: decrementMoth,
+                      incrementMoth: incrementMoth,
+                      actuallyMonth: actuallyMonth,
+                    ),
+                    //Final
+                    // const SizedBox(height: 20)
+                  ],
                 ),
               ),
-              if (_isBannerAdReady)
-                Positioned(
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  child: SizedBox(
-                    width: _bannerAd.size.width.toDouble(),
-                    height: _bannerAd.size.height.toDouble(),
-                    child: AdWidget(ad: _bannerAd),
-                  ),
-                )
-            ],
-          ),
+            ),
+            // Banner publicitario superpuesto
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: Container(
+                  color: Colors.white,
+                  width: _bannerAd.size.width.toDouble(),
+                  height: _bannerAd.size.height.toDouble(),
+                  child: AdWidget(ad: _bannerAd),
+                ),
+              ),
+          ],
         ),
       ),
     );
@@ -443,7 +441,7 @@ class CardViewTotalExpensByMonth extends StatelessWidget {
     return BlocBuilder<GetTotalExpensesByMonthBloc, GetExpensesByMonthState>(
       builder: (context, state) {
         String? response;
-        
+
         if (state is GetTotalExpensesByMonthLoading) {
           response = "Calculando gastos...";
         }
