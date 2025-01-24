@@ -32,7 +32,6 @@ class _SellScreenState extends State<SellScreen> {
   @override
   void dispose() {
     // TODO: implement dispose
-    print("me acabo de restaurar");
     super.dispose();
   }
 
@@ -45,7 +44,6 @@ class _SellScreenState extends State<SellScreen> {
             '#ff6666', 'Cancel', true, ScanMode.BARCODE)!
         .listen((barcode) {
       if (!mounted) return;
-      print("se escaneo el barcode por fin: ${barcode}");
 
       final now = DateTime.now();
 
@@ -61,14 +59,11 @@ class _SellScreenState extends State<SellScreen> {
       _lastScaneedTime = now;
 
       if (barcode == '-1') {
-        print("El escaneo fue cancelado por el usuario.");
         setState(() {});
       } else {
-        print("Se escaneó el código de barras: $barcode");
         context.read<GetProductByBarcodeBloc>().add(
               GetProductByBarcodeEvent(barcode: barcode),
             );
-        FlutterBeep.beep();
         return;
       }
     });
@@ -180,8 +175,6 @@ class _BodySellState extends State<BodySell> {
               BlocConsumer<GetTotalProductsInSaleitemBlocBloc,
                       GetTotalProductsInSaleitemBlocState>(
                   builder: (context, state) {
-                print("hola este es el estado ${state}");
-                restart();
                 if (state is GetTotalProductsInSaleitemBlocLoading) {
                   return const Center(child: CircularProgressIndicator());
                 } else if (state is GetTotalProductsInSaleitemBlocSuccess) {
@@ -194,8 +187,7 @@ class _BodySellState extends State<BodySell> {
                     )));
                   }
                   allProducts = state.listSaleItem;
-                  filteredProducts =
-                      filteredProducts.isEmpty ? allProducts : filteredProducts;
+                  filteredProducts = filteredProducts.isEmpty ? allProducts : filteredProducts;
                   return Expanded(
                     child: ListView.builder(
                       itemCount: filteredProducts.length,
@@ -373,7 +365,6 @@ class _CustomCardSellState extends State<CustomCardSell> {
                 BlocListener<GetProductByBarcodeBloc, GetProductByBarcodeState>(
                   listener: (context, state) {
                     if (state is GetProductByBarcodeSucces) {
-                      print("me ejecuto n cantidad de veces ${state}");
                       setState(() {
                         if (state.product.id == widget.product.product.id) {
                           widget.order[widget.index].quantity += 1;
@@ -387,8 +378,7 @@ class _CustomCardSellState extends State<CustomCardSell> {
                       });
                     } else if (state is GetProductByBarcodeFailure) {
                       FlutterBeep.beep(false);
-                      print(
-                          "Error al buscar el producto por código de barras.");
+                      
                     }
                   },
                   child: const SizedBox
