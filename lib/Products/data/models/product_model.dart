@@ -1,5 +1,6 @@
 import 'package:hive_flutter/adapters.dart';
 import 'package:mi_tiendita/Products/domain/entities.dart';
+import 'package:mi_tiendita/Sales/domain/sales.entity.dart';
 
 part 'product_model.g.dart';
 
@@ -122,5 +123,9 @@ class ProductDto extends HiveObject {
       stock: stock,
       barCode: barCode
     );
+  }
+
+  SaleItem toSaleItem() {
+    return SaleItem(product: Product(id: id, name: name, price: price, stock: stock), quantity: 0);
   }
 }

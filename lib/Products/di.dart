@@ -1,3 +1,7 @@
+import 'package:mi_tiendita/Products/domain/use_case/get_product_by_barcode_usecase.dart';
+import 'package:mi_tiendita/Products/domain/use_case/get_total_products_in_saleItem_usecase.dart';
+import 'package:mi_tiendita/Products/presentation/bloc/get_product_by_barcode_bloc.dart';
+import 'package:mi_tiendita/Products/presentation/bloc/get_total_products_in_saleitem_bloc_bloc.dart';
 import 'package:mi_tiendita/Sales/domain/use_case/get_total_sale_by_day.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mi_tiendita/Products/data/dataSorce/product_local_data_source.dart';
@@ -46,12 +50,16 @@ Future<void> init() async {
 
   //bloc   PRODUCTS
   di.registerFactory(() => ProductsBloc(di(), di(), di(), di()));
+  di.registerFactory(() => GetProductByBarcodeBloc(di()));
+  di.registerFactory(() => GetTotalProductsInSaleitemBlocBloc(di()));
 
   //useCase
   di.registerLazySingleton(() => GetProductsUseCase(repository: di()));
   di.registerLazySingleton(() => AddProductUseCase(repository: di()));
   di.registerLazySingleton(() => DeleteProductUseCase(repository: di()));
   di.registerLazySingleton(() => UpdateProductUseCase(repository: di()));
+  di.registerLazySingleton(() => GetProductByBarcodeUsecase(repository: di()));
+  di.registerLazySingleton(() => GetTotalProductsInSaleitemUsecase(repository: di()));
 
   //repository
   di.registerLazySingleton<ProductsRepository>(

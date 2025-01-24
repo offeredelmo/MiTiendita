@@ -24,6 +24,7 @@ class _ProductsState extends State<Products> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("Mis productos")),
+      resizeToAvoidBottomInset: true,
       body: const ProductList(),
     );
   }
@@ -62,7 +63,11 @@ class ProductList extends StatelessWidget {
           return const Center(child: CircularProgressIndicator());
         } else if (state is ProductsSuccesProductList) {
           if (state.products.isEmpty) {
-            return const Center(child: Text("Aun no hay producto regresa al inicio y agrega un nuevo producto", style: TextStyle(fontSize: 18)), );
+            return const Center(
+              child: Text(
+                  "Aun no hay producto regresa al inicio y agrega un nuevo producto",
+                  style: TextStyle(fontSize: 18)),
+            );
           }
           return ListView.builder(
             itemCount: state.products.length,
@@ -98,8 +103,13 @@ class ProductCard extends StatefulWidget {
 class _ProductCardState extends State<ProductCard> {
   File? _selectedImage;
   String? _productName;
+  String? _barCode;
   double? _price;
-  int? _quantity;
+  int? _stock;
+  final FocusNode productNameFocus = FocusNode();
+  final FocusNode productPriceFocus = FocusNode();
+  final FocusNode productBarcodeFocus = FocusNode();
+  final FocusNode productStockFocus = FocusNode();
 
   @override
   Widget build(BuildContext context) {
@@ -191,8 +201,9 @@ class _ProductCardState extends State<ProductCard> {
   Future<dynamic> _modalAddProduct(BuildContext context) {
     _productName = widget.product.name;
     _price = widget.product.price;
-    _quantity = widget.product.stock;
+    _stock = widget.product.stock;
     _selectedImage;
+    _barCode = widget.product.barCode;
 
     Future<void> _pickImage() async {
       final imagePicker = ImagePicker();
@@ -206,6 +217,7 @@ class _ProductCardState extends State<ProductCard> {
     }
 
     return showModalBottomSheet(
+        isScrollControlled: true, // Esto permite controlar la altura del mod
         context: context,
         builder: (BuildContext context) {
           return BlocListener<ProductsBloc, ProductsState>(
@@ -235,108 +247,138 @@ class _ProductCardState extends State<ProductCard> {
                   );
                 }
               },
-              child: SizedBox(
-                height: 600,
-                child: Center(
-                  child: Column(
-                    children: [
-                      const SizedBox(height: 50),
-                      SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.9,
-                        height: 50,
-                        child: TextFormField(
-                          initialValue: _productName,
-                          decoration: const InputDecoration(
-                            border: OutlineInputBorder(),
-                            labelText: "Nombre del producto",
+              child: Padding(
+                padding: MediaQuery.of(context)
+                    .viewInsets, // Ajusta el padding al teclado
+                child: SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.7,
+                  child: Center(
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 50),
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width * 0.9,
+                          height: 50,
+                          child: TextFormField(
+                            initialValue: _productName,
+                            focusNode: productNameFocus,
+                            onTapOutside: (event) => productNameFocus,
+                            decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                              labelText: "Nombre del producto",
+                            ),
+                            onChanged: (value) {
+                              setState(() {
+                                _productName = value;
+                              });
+                            },
                           ),
-                          onChanged: (value) {
-                            setState(() {
-                              _productName = value;
-                            });
+                        ),
+                        const SizedBox(height: 25),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            SizedBox(
+                              width: MediaQuery.of(context).size.width * 0.425,
+                              child: TextFormField(
+                                initialValue: _price?.toString(),
+                                focusNode: productPriceFocus,
+                                onTapOutside: (event) => productPriceFocus,
+                                keyboardType: TextInputType.number,
+                                decoration: const InputDecoration(
+                                  border: OutlineInputBorder(),
+                                  labelText: "Precio",
+                                ),
+                                onChanged: (value) {
+                                  setState(() {
+                                    _price = double.tryParse(value) ?? 0.0;
+                                  });
+                                },
+                              ),
+                            ),
+                            SizedBox(
+                                width:
+                                    MediaQuery.of(context).size.width * 0.05),
+                            SizedBox(
+                              width: MediaQuery.of(context).size.width * 0.425,
+                              child: TextFormField(
+                                initialValue: _stock?.toString(),
+                                focusNode: productStockFocus,
+                                onTapOutside: (event) => productStockFocus,
+                                keyboardType: TextInputType.number,
+                                decoration: const InputDecoration(
+                                  border: OutlineInputBorder(),
+                                  labelText: "Cantidad",
+                                ),
+                                onChanged: (value) {
+                                  setState(() {
+                                    _stock = int.tryParse(value) ?? 0;
+                                  });
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 25),
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width * 0.9,
+                          child: TextFormField(
+                            initialValue: _barCode?.toString(),
+                            focusNode: productBarcodeFocus,
+                            onTapOutside: (event) => productBarcodeFocus,
+                            keyboardType: TextInputType.number,
+                            decoration: const InputDecoration(
+                                border: OutlineInputBorder(),
+                                labelText: "Codigo de barras",
+                                helperText: "Opcional"),
+                            onChanged: (value) {
+                              setState(() {
+                                _barCode = value;
+                              });
+                            },
+                          ),
+                        ),
+                        const SizedBox(height: 25),
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width * 0.4,
+                          height: 50,
+                          child: GestureDetector(
+                            onTap: _pickImage,
+                            child: Container(
+                              height: 200,
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Colors.grey),
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
+                              child: _selectedImage != null
+                                  ? Image.file(_selectedImage!,
+                                      fit: BoxFit.cover)
+                                  : const Center(
+                                      child: Icon(Icons.add_a_photo,
+                                          size: 50, color: Colors.grey),
+                                    ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16.0),
+                        ElevatedButton(
+                          onPressed: () {
+                            final newProduct = Product(
+                                id: widget.product.id,
+                                name: _productName ?? widget.product.name,
+                                price: _price ?? widget.product.price,
+                                stock: _stock ?? widget.product.stock,
+                                img_url: _selectedImage?.path ??
+                                    widget.product.img_url,
+                                barCode: _barCode ?? widget.product.barCode);
+                            context
+                                .read<ProductsBloc>()
+                                .add(UpdateProduct(product: newProduct));
                           },
+                          child: const Text('Guardar Producto'),
                         ),
-                      ),
-                      const SizedBox(height: 25),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          SizedBox(
-                            width: MediaQuery.of(context).size.width * 0.425,
-                            child: TextFormField(
-                              initialValue: _price?.toString(),
-                              keyboardType: TextInputType.number,
-                              decoration: const InputDecoration(
-                                border: OutlineInputBorder(),
-                                labelText: "Precio",
-                              ),
-                              onChanged: (value) {
-                                setState(() {
-                                  _price = double.tryParse(value) ?? 0.0;
-                                });
-                              },
-                            ),
-                          ),
-                          SizedBox(
-                              width: MediaQuery.of(context).size.width * 0.05),
-                          SizedBox(
-                            width: MediaQuery.of(context).size.width * 0.425,
-                            child: TextFormField(
-                              initialValue: _quantity?.toString(),
-                              keyboardType: TextInputType.number,
-                              decoration: const InputDecoration(
-                                border: OutlineInputBorder(),
-                                labelText: "Cantidad",
-                              ),
-                              onChanged: (value) {
-                                setState(() {
-                                  _quantity = int.tryParse(value) ?? 0;
-                                });
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 25),
-                      SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.4,
-                        height: 50,
-                        child: GestureDetector(
-                          onTap: _pickImage,
-                          child: Container(
-                            height: 200,
-                            decoration: BoxDecoration(
-                              border: Border.all(color: Colors.grey),
-                              borderRadius: BorderRadius.circular(8.0),
-                            ),
-                            child: _selectedImage != null
-                                ? Image.file(_selectedImage!, fit: BoxFit.cover)
-                                : const Center(
-                                    child: Icon(Icons.add_a_photo,
-                                        size: 50, color: Colors.grey),
-                                  ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 16.0),
-                      ElevatedButton(
-                        onPressed: () {
-                          final newProduct = Product(
-                            id: widget.product.id,
-                            name: _productName ?? widget.product.name,
-                            price: _price ?? widget.product.price,
-                            stock: _quantity ?? widget.product.stock,
-                            img_url:
-                                _selectedImage?.path ?? widget.product.img_url,
-                          );
-
-                          context
-                              .read<ProductsBloc>()
-                              .add(UpdateProduct(product: newProduct));
-                        },
-                        child: const Text('Guardar Producto'),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ));

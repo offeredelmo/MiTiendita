@@ -16,10 +16,11 @@ import 'package:mi_tiendita/expenses/presentation/block/delete_expense_by_id_blo
 import 'package:mi_tiendita/expenses/presentation/block/get_expense.dart';
 import 'package:mi_tiendita/expenses/presentation/block/get_expenses_by_month_bloc.dart';
 
+import 'Products/presentation/bloc/get_product_by_barcode_bloc.dart';
+import 'Products/presentation/bloc/get_total_products_in_saleitem_bloc_bloc.dart';
 import 'Products/presentation/screens/Home.dart';
 import 'Products/presentation/screens/Products.dart';
 import 'Sales/presentation/bloc/bloc_get_orders/get_sales_by_day_bloc.dart';
-
 
 import 'Sales/presentation/bloc/metrics/metrics_bloc.dart';
 import 'Ticket/Data/models/ticket_model.dart';
@@ -53,8 +54,15 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (_) => GetIt.instance.get<AddInfoTicketBloc>()),
         BlocProvider(create: (_) => GetIt.instance.get<GetExpensesBloc>()),
         BlocProvider(create: (_) => GetIt.instance.get<CreateExpenseBloc>()),
-        BlocProvider(create: (_) => GetIt.instance.get<DeleteExpenseByIdBloc>()),
-        BlocProvider(create: (_) => GetIt.instance.get<GetTotalExpensesByMonthBloc>())
+        BlocProvider(
+            create: (_) => GetIt.instance.get<DeleteExpenseByIdBloc>()),
+        BlocProvider(
+            create: (_) => GetIt.instance.get<GetTotalExpensesByMonthBloc>()),
+        BlocProvider(
+            create: (_) => GetIt.instance.get<GetProductByBarcodeBloc>()),
+        BlocProvider(
+            create: (_) =>
+                GetIt.instance.get<GetTotalProductsInSaleitemBlocBloc>())
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
@@ -70,11 +78,9 @@ class MyApp extends StatelessWidget {
           "/sales": (context) => const SalesScreen(),
           "/metrics": (context) => const Metrics(),
           "/print": (context) => const PrintScreen(),
-          "/expenses": (context) =>  const ExpensesByDateScreen(),
+          "/expenses": (context) => const ExpensesByDateScreen(),
         },
       ),
     );
   }
 }
-
-

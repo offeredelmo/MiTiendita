@@ -114,6 +114,7 @@ class SaleDto extends HiveObject {
   }
 
   
+  
 
   // SalesEntity toEntity() {
   //   return SalesEntity(

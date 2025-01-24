@@ -3,6 +3,7 @@ import 'package:dartz/dartz.dart';
 import 'package:mi_tiendita/Products/data/dataSorce/product_local_data_source.dart';
 import 'package:mi_tiendita/Products/domain/entities.dart';
 import 'package:mi_tiendita/Products/domain/repository.dart';
+import 'package:mi_tiendita/Sales/domain/sales.entity.dart';
 import 'package:mi_tiendita/core/error/failures.dart';
 
 class ProductsRepositoryImpl implements ProductsRepository {
@@ -51,6 +52,27 @@ class ProductsRepositoryImpl implements ProductsRepository {
     } catch (e) {
        throw LocalFailure();
     }
+  }
+  
+  @override
+  Future<Either<Failure, Product>> getProductByBarcode(String barcode) async{
+   try {
+     final response = await   productsLocalDataSource.getProductByBarcode(barcode);
+     return Right(response);
+   } catch (e) {
+     return Left(LocalFailure());
+   }
+  }
+
+  @override
+  Future<Either<Failure, List<SaleItem>>> getTotalProductInSaleItem() async{
+   try {
+     final response = await productsLocalDataSource.getTotalProductInSaleItem();
+     return Right(response);
+   } catch (e) {
+     return Left(LocalFailure());
+     
+   }
   }
   
 }

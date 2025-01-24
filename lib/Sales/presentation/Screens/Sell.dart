@@ -2,13 +2,13 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:mi_tiendita/Products/domain/entities.dart';
-import 'package:mi_tiendita/Products/presentation/bloc/products_bloc.dart';
+import 'package:mi_tiendita/Products/presentation/bloc/get_product_by_barcode_bloc.dart';
 import 'package:mi_tiendita/Sales/domain/sales.entity.dart';
 import 'package:mi_tiendita/Sales/presentation/Widget/buttonPay.widget.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
-
+import 'package:flutter_beep/flutter_beep.dart';
+import '../../../Products/presentation/bloc/get_total_products_in_saleitem_bloc_bloc.dart';
 import '../bloc/sales/sales_bloc_bloc.dart';
 
 class SellScreen extends StatefulWidget {
@@ -22,13 +22,56 @@ class _SellScreenState extends State<SellScreen> {
   @override
   void initState() {
     super.initState();
-    context.read<ProductsBloc>().add(GetProducts());
+    setState(() {
+      context
+          .read<GetTotalProductsInSaleitemBlocBloc>()
+          .add(GetTotalProductsInSaleitemBlocEvent());
+    });
   }
 
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    print("me acabo de restaurar");
+    super.dispose();
+  }
+
+  String? _lastBarcode;
+  DateTime? _lastScaneedTime;
+  //FUNCION PARA ABRIR LA CAMARA Y ESCANEAR BARCODES
   Future<void> startBarcodeScanStream() async {
+    //Buscar el elemento por el barcode
     FlutterBarcodeScanner.getBarcodeStreamReceiver(
             '#ff6666', 'Cancel', true, ScanMode.BARCODE)!
-        .listen((barcode) => print(barcode));
+        .listen((barcode) {
+      if (!mounted) return;
+      print("se escaneo el barcode por fin: ${barcode}");
+
+      final now = DateTime.now();
+
+      //VALIDAR SI EL BARCODE FUE ESCANEADO RECIENTEMENTE
+      if (_lastBarcode == barcode &&
+          _lastScaneedTime != null &&
+          now.difference(_lastScaneedTime!).inSeconds < 3) {
+        //nadota que ya leyo el codigo mil veces paaaaa
+        return;
+      }
+
+      _lastBarcode = barcode;
+      _lastScaneedTime = now;
+
+      if (barcode == '-1') {
+        print("El escaneo fue cancelado por el usuario.");
+        setState(() {});
+      } else {
+        print("Se escaneó el código de barras: $barcode");
+        context.read<GetProductByBarcodeBloc>().add(
+              GetProductByBarcodeEvent(barcode: barcode),
+            );
+        FlutterBeep.beep();
+        return;
+      }
+    });
   }
 
   @override
@@ -37,7 +80,11 @@ class _SellScreenState extends State<SellScreen> {
       appBar: AppBar(
         title: const Text("Mi tiendita"),
         actions: [
-          IconButton(onPressed: (){ startBarcodeScanStream();}, icon: Icon(Icons.document_scanner_outlined))
+          IconButton(
+              onPressed: () async {
+                await startBarcodeScanStream();
+              },
+              icon: const Icon(Icons.document_scanner_outlined))
         ],
       ),
       body: GestureDetector(
@@ -59,11 +106,10 @@ class BodySell extends StatefulWidget {
 
 class _BodySellState extends State<BodySell> {
   double totalSell = 0;
-  final List<SaleItem> order = [];
   final TextEditingController _searchController = TextEditingController();
 
-  List<Product> filteredProducts = [];
-  List<Product> allProducts = [];
+  List<SaleItem> filteredProducts = [];
+  List<SaleItem> allProducts = [];
 
   @override
   void initState() {
@@ -71,9 +117,10 @@ class _BodySellState extends State<BodySell> {
     _searchController.addListener(_onSearchChanged);
   }
 
+//FUNCION PARA OBTENER EL TOTAL DE LA VENTA
   void _totalSell() {
     setState(() {
-      totalSell = order.fold(
+      totalSell = allProducts.fold(
           0, (total, item) => total + (item.product.price * item.quantity));
     });
   }
@@ -82,10 +129,16 @@ class _BodySellState extends State<BodySell> {
     _totalSell();
   }
 
+  void restart() {
+    allProducts = [];
+    filteredProducts = [];
+  }
+
+  //FUNCION PARA FILTRAR LOS PRODUCTOS POR EL BUSCADOR
   void _onSearchChanged() {
     setState(() {
       filteredProducts = allProducts
-          .where((product) => product.name
+          .where((product) => product.product.name
               .toLowerCase()
               .contains(_searchController.text.toLowerCase()))
           .toList();
@@ -118,18 +171,21 @@ class _BodySellState extends State<BodySell> {
             children: [
               ButtonPay(
                 totalSell: totalSell,
-                listItem: order,
+                listItem: allProducts,
               ),
               const SizedBox(
                 height: 10,
               ),
               TextFieldSearchProduct(context),
-              BlocConsumer<ProductsBloc, ProductsState>(
+              BlocConsumer<GetTotalProductsInSaleitemBlocBloc,
+                      GetTotalProductsInSaleitemBlocState>(
                   builder: (context, state) {
-                if (state is ProductGetListLoading) {
+                print("hola este es el estado ${state}");
+                restart();
+                if (state is GetTotalProductsInSaleitemBlocLoading) {
                   return const Center(child: CircularProgressIndicator());
-                } else if (state is ProductsSuccesProductList) {
-                  if (state.products.isEmpty) {
+                } else if (state is GetTotalProductsInSaleitemBlocSuccess) {
+                  if (state.listSaleItem.isEmpty) {
                     return const Expanded(
                         child: Center(
                             child: Text(
@@ -137,23 +193,24 @@ class _BodySellState extends State<BodySell> {
                       style: TextStyle(fontSize: 18),
                     )));
                   }
-                  allProducts = state.products;
+                  allProducts = state.listSaleItem;
                   filteredProducts =
                       filteredProducts.isEmpty ? allProducts : filteredProducts;
                   return Expanded(
                     child: ListView.builder(
                       itemCount: filteredProducts.length,
                       itemBuilder: (context, index) {
-                        final product = filteredProducts[index];
+                        final order = filteredProducts[index];
                         return CustomCardSell(
-                          product: product,
-                          order: order,
+                          index: index,
+                          product: order,
+                          order: allProducts,
                           onOrderChanged: _onOrderChanged,
                         );
                       },
                     ),
                   );
-                } else if (state is ProductsFailure) {
+                } else if (state is GetTotalProductsInSaleitemBloFailure) {
                   return const Center(
                     child: Text("Ha ocurrido un error al cargar los productos"),
                   );
@@ -164,12 +221,13 @@ class _BodySellState extends State<BodySell> {
                 }
               }, listener: (context, state) {
                 return null;
-              })
+              }),
             ],
           ),
         ));
   }
 
+//BUSCADOR DE PRODUCTOS
   SizedBox TextFieldSearchProduct(BuildContext context) {
     return SizedBox(
       width: MediaQuery.of(context).size.width * 0.95,
@@ -198,13 +256,16 @@ class _BodySellState extends State<BodySell> {
 
 class SalesBlocFailure {}
 
+//WIDGET DE LA CARD DE PRODUCTOS PARA LA VENTA
 class CustomCardSell extends StatefulWidget {
-  final Product product;
+  final int index;
+  final SaleItem product;
   final List<SaleItem> order;
   final VoidCallback onOrderChanged; // Nuevo parámetro
 
   const CustomCardSell({
     super.key,
+    required this.index,
     required this.product,
     required this.order,
     required this.onOrderChanged,
@@ -215,14 +276,12 @@ class CustomCardSell extends StatefulWidget {
 }
 
 class _CustomCardSellState extends State<CustomCardSell> {
-  int quantity = 0;
   late TextEditingController _controller;
-  late SaleItem orderItem;
 
   @override
   void initState() {
     super.initState();
-    _controller = TextEditingController(text: quantity.toString());
+    _controller = TextEditingController(text: "0");
   }
 
   @override
@@ -233,28 +292,9 @@ class _CustomCardSellState extends State<CustomCardSell> {
 
   void _updateQuantity(String value) {
     final newQuantity = int.tryParse(value) ?? 0;
-
+    widget.order[widget.index].quantity = newQuantity;
     setState(() {
-      final existingItem = widget.order.firstWhere(
-        (item) => item.product.id == widget.product.id,
-        orElse: () => SaleItem(product: widget.product, quantity: 0),
-      );
-
-      if (newQuantity > 0) {
-        if (existingItem.quantity > 0) {
-          existingItem.quantity = newQuantity;
-        } else {
-          widget.order
-              .add(SaleItem(product: widget.product, quantity: newQuantity));
-        }
-      } else {
-        if (existingItem.quantity > 0) {
-          widget.order.remove(existingItem);
-        }
-      }
-
-      quantity = newQuantity;
-      _controller.text = quantity.toString();
+      _controller.text = widget.order[widget.index].quantity.toString();
     });
 
     widget.onOrderChanged();
@@ -270,7 +310,7 @@ class _CustomCardSellState extends State<CustomCardSell> {
           child: Row(children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(5.0),
-              child: _imageWidget(widget.product.img_url),
+              child: _imageWidget(widget.product.product.img_url),
             ),
             const SizedBox(width: 10),
             Expanded(
@@ -278,10 +318,10 @@ class _CustomCardSellState extends State<CustomCardSell> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  widget.product.name,
+                  widget.product.product.name,
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
-                Text("Precio: \$${widget.product.price}"),
+                Text("Precio: \$${widget.product.product.price}"),
                 const SizedBox(
                   height: 5,
                 ),
@@ -308,28 +348,10 @@ class _CustomCardSellState extends State<CustomCardSell> {
                 TextButton(
                   child: const Text('Agregar'),
                   onPressed: () {
+                    widget.order[widget.index].quantity += 1;
                     setState(() {
-                      // Buscar si el producto ya existe en la lista
-                      final existingItem = widget.order.firstWhere(
-                        (item) => item.product.id == widget.product.id,
-                        orElse: () =>
-                            SaleItem(product: widget.product, quantity: 0),
-                      );
-
-                      if (existingItem.quantity > 0) {
-                        // Si existe, incrementar la cantidad
-                        existingItem.quantity += 1;
-                      } else {
-                        // Si no existe, agregar un nuevo SaleItem
-                        widget.order.add(
-                            SaleItem(product: widget.product, quantity: 1));
-                      }
-
-                      // Actualizar la cantidad local y el controlador de texto
-                      if (quantity >= 0) {
-                        quantity++;
-                      }
-                      _controller.text = quantity.toString();
+                      _controller.text =
+                          widget.order[widget.index].quantity.toString();
                     });
                     widget.onOrderChanged(); // Llamada al callback
                   },
@@ -338,30 +360,39 @@ class _CustomCardSellState extends State<CustomCardSell> {
                 TextButton(
                   child: const Text('Eliminar'),
                   onPressed: () {
-                    setState(() {
-                      // Buscar si el producto ya existe en la lista
-                      final existingItem = widget.order.firstWhere(
-                        (item) => item.product.id == widget.product.id,
-                        orElse: () =>
-                            SaleItem(product: widget.product, quantity: 0),
-                      );
-
-                      if (existingItem.quantity > 0) {
-                        // Decrementar la cantidad
-                        existingItem.quantity -= 1;
-                        quantity = existingItem.quantity;
-                        _controller.text = quantity.toString();
-                        if (quantity > 0) {
-                          quantity--;
-                        }
-                        // Si la cantidad llega a 0, eliminar el SaleItem de la lista
-                        if (existingItem.quantity == 0) {
-                          widget.order.remove(existingItem);
-                        }
-                      }
-                    });
-                    widget.onOrderChanged(); // Llamada al callback
+                    if (widget.order[widget.index].quantity > 0) {
+                      widget.order[widget.index].quantity -= 1;
+                      setState(() {
+                        _controller.text =
+                            widget.order[widget.index].quantity.toString();
+                      });
+                      widget.onOrderChanged(); // Llamada al callback
+                    }
                   },
+                ),
+                BlocListener<GetProductByBarcodeBloc, GetProductByBarcodeState>(
+                  listener: (context, state) {
+                    if (state is GetProductByBarcodeSucces) {
+                      print("me ejecuto n cantidad de veces ${state}");
+                      setState(() {
+                        if (state.product.id == widget.product.product.id) {
+                          widget.order[widget.index].quantity += 1;
+                          FlutterBeep.beep();
+                          widget.onOrderChanged(); // Actualizar la vista
+                          setState(() {
+                              _controller.text =
+                          widget.order[widget.index].quantity.toString();
+                          });
+                        }
+                      });
+                    } else if (state is GetProductByBarcodeFailure) {
+                      FlutterBeep.beep(false);
+                      print(
+                          "Error al buscar el producto por código de barras.");
+                    }
+                  },
+                  child: const SizedBox
+                      .shrink(), // Widget vacío para cumplir con la API
                 ),
               ],
             )

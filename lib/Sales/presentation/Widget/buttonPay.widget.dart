@@ -26,6 +26,12 @@ class ButtonPay extends StatefulWidget {
 }
 
 class _ButtonPayState extends State<ButtonPay> {
+  List<SaleItem> filteredItems = [];
+  
+  void selectItems() {
+    filteredItems = widget.listItem.where((item) => item.quantity > 0).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -41,6 +47,7 @@ class _ButtonPayState extends State<ButtonPay> {
               ),
             );
           } else {
+            selectItems();
             confirmPay(context);
           }
         },
@@ -74,7 +81,7 @@ class _ButtonPayState extends State<ButtonPay> {
       builder: (BuildContext context) {
         return ConfirmPayModal(
           totalSell: widget.totalSell,
-          listItem: widget.listItem,
+          listItem: filteredItems,
         );
       },
     );

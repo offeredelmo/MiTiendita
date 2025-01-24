@@ -35,9 +35,11 @@ class SaleLocalDatasourceImpl implements SaleLocalDataSource {
 
       for (var element in salesEntity.items) {
         final existingProductDto = boxProducts.get(element.product.id);
-        if (existingProductDto != null) {
-          existingProductDto.stock =
-              existingProductDto.stock - element.quantity;
+        if (existingProductDto!.stock > 0) {
+          existingProductDto.stock = existingProductDto.stock - element.quantity;
+          if(existingProductDto.stock < 0){
+            existingProductDto.stock = 0;
+          }
           await existingProductDto.save();
         }
       }
@@ -80,8 +82,9 @@ class SaleLocalDatasourceImpl implements SaleLocalDataSource {
 
       var nextMonth = (month.month % 12) + 1;
       var nextMonthYear = (month.month == 12) ? month.year + 1 : month.year;
-      var lastDayOfMonth = DateTime(nextMonthYear, nextMonth, 1).subtract(const Duration(days: 1));
-      
+      var lastDayOfMonth = DateTime(nextMonthYear, nextMonth, 1)
+          .subtract(const Duration(days: 1));
+
       for (var i = 0; i < lastDayOfMonth.day; i++) {
         final salesByDay = box.values.where((sale) {
           return (sale.saleDate.year == month.year &&
