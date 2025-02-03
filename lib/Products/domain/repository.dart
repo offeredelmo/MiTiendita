@@ -6,11 +6,11 @@ import 'package:mi_tiendita/core/error/failures.dart';
 import '../../Sales/domain/sales.entity.dart';
 
 abstract class ProductsRepository {
-  Future<Either<Failure, List<Product>>> getProducts();
-  Future<Either<Failure, bool>> addProduct(Product product);
-  Future<Either<Failure, bool>> deleteProduct(String id);
-  Future<Either<Failure, bool>> updateProduct(Product product);
-  Future<Either<Failure, Product>> getProductByBarcode(String barcode);
-  Future<Either<Failure,List<SaleItem>>> getTotalProductInSaleItem();
+  Future<Either<LocalFailure, List<Product>>> getProducts();
+  Future<Either<LocalFailure, bool>> addProduct(Product product);
+  Future<Either<LocalFailure, bool>> deleteProduct(String id);
+  Future<Either<LocalFailure, bool>> updateProduct(Product product);
+  Future<Either<LocalFailure, Product>> getProductByBarcode(String barcode);
+  Future<Either<LocalFailure,List<SaleItem>>> getTotalProductInSaleItem();
 
 }

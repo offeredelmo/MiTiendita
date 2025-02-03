@@ -9,7 +9,7 @@ class GetProductByBarcodeUsecase {
 
   GetProductByBarcodeUsecase({required this.repository});
 
-  Future<Either<Failure, Product>> call(String barcode) {
+  Future<Either<LocalFailure, Product>> call(String barcode) {
     return  repository.getProductByBarcode(barcode);
   }
   

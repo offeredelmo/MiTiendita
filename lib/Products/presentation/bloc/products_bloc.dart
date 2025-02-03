@@ -29,7 +29,7 @@ class ProductsBloc extends Bloc<ProductsEvent, ProductsState> {
     on<AddProducts>((event, emit) async{
       emit(ProductAddLoading());
       final resp = await _addProductUseCase(event.product);
-      resp.fold((l) => emit(ProductsFailure()) , (r) => emit(ProductsSucces()));
+      resp.fold((l) => emit(ProductsFailure(message: l.message)) , (r) => emit(ProductsSucces()));
     });
 
     on<DeleteProducts>((event, emit) async{

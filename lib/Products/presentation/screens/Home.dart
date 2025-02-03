@@ -242,7 +242,8 @@ class _MyHomePageState extends State<MyHomePage> {
                   duration: Duration(milliseconds: 900),
                 ),
               );
-            } else if (state is ProductsSucces) {
+            } 
+            if (state is ProductsSucces) {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
                   content: Text("El producto se ha agregado exitosamente."),
@@ -251,11 +252,13 @@ class _MyHomePageState extends State<MyHomePage> {
               );
               Navigator.pop(
                   context); // Cierra el modal después de agregar exitosamente
-            } else if (state is ProductsFailure) {
+            } 
+            if (state is ProductsFailure) {
+               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
+                SnackBar(
                     content: Text(
-                        "Ha ocurrido un error. Si persiste, contáctenos por correo electrónico.")),
+                        "Ha ocurrido un error. ${state.message}"), backgroundColor: Colors.red,),
               );
             }
           },

@@ -8,7 +8,7 @@ class UpdateProductUseCase {
   final ProductsRepository repository;
   UpdateProductUseCase({required this.repository});
 
-  Future<Either<Failure,bool>> call(Product product){
+  Future<Either<LocalFailure,bool>> call(Product product){
     return repository.updateProduct(product);
   }
 }

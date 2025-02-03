@@ -1,3 +1,4 @@
+import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:mi_tiendita/Products/data/models/product_model.dart';
@@ -25,28 +26,33 @@ class ProductsLocalDataSourceImpl implements ProductsLocalDataSource {
     return box.values.map((p) => p.toProduct()).toList();
   }
 
-  @override
-  Future<bool> addProduct(Product product) async {
-    try {
-      final box = await Hive.openBox<ProductDto>(_boxName);
-
-      final id = ObjectId().toString(); // Genera un nuevo ID
-
-      // Crea un nuevo Product con el ID generado
-      final productWithId = Product(
-          id: id,
-          name: product.name,
-          img_url: product.img_url,
-          price: product.price,
-          stock: product.stock,
-          barCode: product.barCode);
-      await box.put(id, ProductDto.fromModel(productWithId));
-      return true;
-    } catch (e) {
-      debugPrint(e.toString());
-      throw LocalFailure();
+@override
+Future<bool> addProduct(Product product) async {
+  try {
+    final box = await Hive.openBox<ProductDto>(_boxName);
+    final id = ObjectId().toString(); // Genera un nuevo ID
+    
+    //Primero se busca si hay un producto con el mismo nombre, para evitar duplicidad
+    final existProduct = box.values.any((p) => p.name.toLowerCase() == product.name.toLowerCase());
+    if (existProduct) {
+      throw Exception("Ya existe un producto registrado con ese nombre");
     }
+
+    final productWithId = Product(
+        id: id,
+        name: product.name,
+        img_url: product.img_url,
+        price: product.price,
+        stock: product.stock,
+        barCode: product.barCode);
+    await box.put(id, ProductDto.fromModel(productWithId));
+    return true;
+  } catch (e) {
+    debugPrint("Error en DataSource: $e");
+    throw Exception(e.toString()); // Lanza la excepción con el mensaje correcto
   }
+}
+
 
   @override
   Future<bool> deleteProduct(String id) async {

@@ -37,6 +37,12 @@ final class AddProductsSucces extends ProductsState {
   AddProductsSucces({required this.product});
 }
 
+final class AddProductFailureNameExist extends ProductsState {
+ 
+  
+}
+
+
 final class ProductDeleteSucces extends ProductsState {
   
 }
@@ -45,6 +51,11 @@ final class UpdateProductSucces extends ProductsState {
   
 }
 
-final class ProductsFailure extends ProductsState {}
+final class ProductsFailure extends ProductsState {
+  final String? message;
+
+  ProductsFailure({this.message});
+  
+}
 
 

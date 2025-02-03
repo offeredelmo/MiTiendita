@@ -10,7 +10,7 @@ class DeleteProductUseCase {
   DeleteProductUseCase({required this.repository});
 
 
-  Future<Either<Failure, bool>> call(String id) {
+  Future<Either<LocalFailure, bool>> call(String id) {
     return repository.deleteProduct(id);
   }
 }

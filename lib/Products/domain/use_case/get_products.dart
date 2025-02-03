@@ -11,7 +11,7 @@ class GetProductsUseCase {
 
   GetProductsUseCase({required this.repository});
 
-  Future<Either<Failure, List<Product>>> call() {
+  Future<Either<LocalFailure, List<Product>>> call() {
     return repository.getProducts();
   }
 }

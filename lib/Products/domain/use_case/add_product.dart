@@ -9,7 +9,7 @@ class AddProductUseCase {
 
   AddProductUseCase({required this.repository});
 
-  Future<Either<Failure, bool>> call(Product product) {
+  Future<Either<LocalFailure, bool>> call(Product product) {
     return repository.addProduct(product);
   }
 }

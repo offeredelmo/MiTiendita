@@ -8,7 +8,7 @@ class GetTotalProductsInSaleitemUsecase {
 
   GetTotalProductsInSaleitemUsecase({required this.repository});
   
-  Future<Either<Failure, List<SaleItem>>> call() {
+  Future<Either<LocalFailure, List<SaleItem>>> call() {
     return repository.getTotalProductInSaleItem();
   }
 }

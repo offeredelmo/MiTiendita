@@ -50,7 +50,7 @@ class _SellScreenState extends State<SellScreen> {
       //VALIDAR SI EL BARCODE FUE ESCANEADO RECIENTEMENTE
       if (_lastBarcode == barcode &&
           _lastScaneedTime != null &&
-          now.difference(_lastScaneedTime!).inSeconds < 3) {
+          now.difference(_lastScaneedTime!).inSeconds < 2) {
         //nadota que ya leyo el codigo mil veces paaaaa
         return;
       }

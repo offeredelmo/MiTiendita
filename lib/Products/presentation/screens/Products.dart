@@ -163,6 +163,29 @@ class _ProductCardState extends State<ProductCard> {
     );
   }
 
+  Row TextStockDynamicByQuantity() {
+    if (widget.product.stock <= 10) {
+      return Row(
+        children: [
+          const Text("Stock: "),
+          Text("${widget.product.stock}",
+              style: const TextStyle(color: Colors.orange))
+        ],
+      );
+    }
+    if (widget.product.stock <= 5) {
+      return Row(
+        children: [
+          const Text("Stock: "),
+          Text("${widget.product.stock}",
+              style: const TextStyle(color: Colors.orange))
+        ],
+      );
+    }
+    return Row(children: [Text("Stock: ${widget.product.stock}")],);
+    
+  }
+
   // Función para obtener el widget de imagen o el fallback
   Widget _imageWidget(String? imagePath) {
     if (imagePath != null && imagePath.isNotEmpty) {
@@ -241,9 +264,9 @@ class _ProductCardState extends State<ProductCard> {
                       context); // Cierra el modal después de agregar exitosamente
                 } else if (state is ProductsFailure) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
+                    SnackBar(
                         content: Text(
-                            "Ha ocurrido un error. Si persiste, contáctenos por correo electrónico.")),
+                            "Ha ocurrido un error. ${state.message}")),
                   );
                 }
               },
