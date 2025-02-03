@@ -53,9 +53,16 @@ final class UpdateProductSucces extends ProductsState {
 
 final class ProductsFailure extends ProductsState {
   final String? message;
-
   ProductsFailure({this.message});
-  
 }
 
 
+final class ProductsUpdateFailure extends ProductsState {
+  final String? message;
+  ProductsUpdateFailure({this.message});
+}
+
+final class ProductsAddFailure extends ProductsState {
+  final String? message;
+  ProductsAddFailure({this.message});
+}

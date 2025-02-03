@@ -76,13 +76,20 @@ class ProductList extends StatelessWidget {
               return ProductCard(product: product);
             },
           );
-        } else if (state is ProductsFailure) {
+        }
+        if (state is ProductsFailure) {
           return const Center(
             child: Text("Ha ocurrido un error al cargar los productos"),
           );
-        } else {
+        } 
+        if (state is ProductsUpdateFailure) {
+          context.read<ProductsBloc>().add(GetProducts());
           return const Center(
-            child: Text("No hay productos disponibles"),
+            child: Text(""),
+          );
+        }else {
+          return const Center(
+            child: Text("A ocrrido un error inesperado, intenta de nuevo"),
           );
         }
       },
@@ -182,8 +189,9 @@ class _ProductCardState extends State<ProductCard> {
         ],
       );
     }
-    return Row(children: [Text("Stock: ${widget.product.stock}")],);
-    
+    return Row(
+      children: [Text("Stock: ${widget.product.stock}")],
+    );
   }
 
   // Función para obtener el widget de imagen o el fallback
@@ -246,13 +254,18 @@ class _ProductCardState extends State<ProductCard> {
           return BlocListener<ProductsBloc, ProductsState>(
               listener: (context, state) {
                 if (state is ProductUpdateLoading) {
+                  Navigator.pop(
+                      context); // Cierra el modal después de agregar exitosamente
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text("Se está actualizando  el producto..."),
                       duration: Duration(milliseconds: 900),
                     ),
                   );
-                } else if (state is UpdateProductSucces) {
+                }
+                if (state is UpdateProductSucces) {
+                  Navigator.pop(
+                      context); // Cierra el modal después de agregar exitosamente
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content:
@@ -260,13 +273,13 @@ class _ProductCardState extends State<ProductCard> {
                       backgroundColor: Colors.green,
                     ),
                   );
-                  Navigator.pop(
-                      context); // Cierra el modal después de agregar exitosamente
-                } else if (state is ProductsFailure) {
+                }
+                if (state is ProductsUpdateFailure) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                        content: Text(
-                            "Ha ocurrido un error. ${state.message}")),
+                      content: Text("Ha ocurrido un error. ${state.message}"),
+                      backgroundColor: Colors.red,
+                    ),
                   );
                 }
               },

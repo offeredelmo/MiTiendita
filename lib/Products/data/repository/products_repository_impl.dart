@@ -17,7 +17,7 @@ class ProductsRepositoryImpl implements ProductsRepository {
       return Right(resp);
     } catch (e) {
       final String error = (e.toString().split(":").length > 1
-              ? e.toString().split(":")[1].trim()
+              ? e.toString().split(":")[2].trim()
               : null) ??
           "Error desconocido";
       return Left(
@@ -51,7 +51,12 @@ class ProductsRepositoryImpl implements ProductsRepository {
       final bool resp = await productsLocalDataSource.updateProduct(product);
       return Right(resp);
     } catch (e) {
-      return Left(LocalFailure());
+      final String error = (e.toString().split(":").length > 1
+              ? e.toString().split(":")[2].trim()
+              : null) ??
+          "Error desconocido";
+      return Left(
+          LocalFailure(message: error)); // Pasar el mensaje de la excepción
     }
   }
 

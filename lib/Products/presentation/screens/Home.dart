@@ -111,7 +111,8 @@ class _MyHomePageState extends State<MyHomePage> {
             SingleChildScrollView(
               padding: EdgeInsets.symmetric(horizontal: 10),
               child: Padding(
-                padding: EdgeInsets.only(bottom: _bannerAd.size.height.toDouble()            ),
+                padding:
+                    EdgeInsets.only(bottom: _bannerAd.size.height.toDouble()),
                 child: Column(
                   children: [
                     //BOTTON PARA REALIZAR UNA VENTA
@@ -181,7 +182,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           }),
                     ),
                     const SizedBox(height: 10),
-                            
+
                     //WIDGET PARA VER EL GASTO TOTAL DEL MES
                     CardViewTotalExpensByMonth(
                       decrementMoth: decrementMoth,
@@ -195,15 +196,15 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
             // Banner publicitario superpuesto
-              Align(
-                alignment: Alignment.bottomCenter,
-                child: Container(
-                  color: Colors.white,
-                  width: _bannerAd.size.width.toDouble(),
-                  height: _bannerAd.size.height.toDouble(),
-                  child: AdWidget(ad: _bannerAd),
-                ),
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: Container(
+                color: Colors.white,
+                width: _bannerAd.size.width.toDouble(),
+                height: _bannerAd.size.height.toDouble(),
+                child: AdWidget(ad: _bannerAd),
               ),
+            ),
           ],
         ),
       ),
@@ -242,7 +243,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   duration: Duration(milliseconds: 900),
                 ),
               );
-            } 
+            }
             if (state is ProductsSucces) {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
@@ -252,13 +253,14 @@ class _MyHomePageState extends State<MyHomePage> {
               );
               Navigator.pop(
                   context); // Cierra el modal después de agregar exitosamente
-            } 
-            if (state is ProductsFailure) {
-               Navigator.pop(context);
+            }
+            if (state is ProductsAddFailure) {
+              Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                    content: Text(
-                        "Ha ocurrido un error. ${state.message}"), backgroundColor: Colors.red,),
+                  content: Text("Ha ocurrido un error. ${state.message}"),
+                  backgroundColor: Colors.red,
+                ),
               );
             }
           },
