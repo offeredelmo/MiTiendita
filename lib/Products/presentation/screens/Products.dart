@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mi_tiendita/Products/domain/entities.dart';
 import 'package:mi_tiendita/Products/presentation/bloc/products_bloc.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:mi_tiendita/Products/presentation/widgets/modal_add_product.dart';
 
 class Products extends StatefulWidget {
   const Products({Key? key}) : super(key: key);
@@ -64,10 +65,12 @@ class ProductList extends StatelessWidget {
         } else if (state is ProductsSuccesProductList) {
           if (state.products.isEmpty) {
             return const Center(
-              child: Text(
-                  "Aun no hay producto regresa al inicio y agrega un nuevo producto",
-                  style: TextStyle(fontSize: 18)),
-            );
+                child: Column(
+              children: [
+                Text("No hay productos agregados aun, agrega uno"),
+                ModalAddProduct()
+              ],
+            ));
           }
           return ListView.builder(
             itemCount: state.products.length,
@@ -81,13 +84,13 @@ class ProductList extends StatelessWidget {
           return const Center(
             child: Text("Ha ocurrido un error al cargar los productos"),
           );
-        } 
+        }
         if (state is ProductsUpdateFailure) {
           context.read<ProductsBloc>().add(GetProducts());
           return const Center(
             child: Text(""),
           );
-        }else {
+        } else {
           return const Center(
             child: Text("A ocrrido un error inesperado, intenta de nuevo"),
           );
@@ -264,8 +267,7 @@ class _ProductCardState extends State<ProductCard> {
                   );
                 }
                 if (state is UpdateProductSucces) {
-                  Navigator.pop(
-                      context); // Cierra el modal después de agregar exitosamente
+                  
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content:

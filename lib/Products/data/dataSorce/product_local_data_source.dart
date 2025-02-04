@@ -72,10 +72,16 @@ class ProductsLocalDataSourceImpl implements ProductsLocalDataSource {
       final box = await Hive.openBox<ProductDto>(_boxName);
       final existingProductDto = await box.get(productToUpdate.id);
 
-      //Primero se busca si hay un producto con el mismo nombre, para evitar duplicidad
-      final existProduct = box.values.any(
-          (p) => p.name.toLowerCase() == productToUpdate.name.toLowerCase());
-      if (existProduct) {
+      // Filtra los productos con el mismo nombre
+      final repeatedProducts = box.values
+          .where(
+              (p) => p.name.toLowerCase() == productToUpdate.name.toLowerCase())
+          .toList();
+
+      final count = repeatedProducts.length;
+
+      if (count > 1) {
+        // Si hay más de uno, significa que hay otro duplicado aparte del actual
         throw Exception("Ya existe un producto registrado con ese nombre");
       }
 
@@ -95,7 +101,8 @@ class ProductsLocalDataSourceImpl implements ProductsLocalDataSource {
       }
     } catch (e) {
       debugPrint("Error en DataSource: $e");
-      throw Exception(e.toString()); // Lanza la excepción con el mensaje correcto
+      throw Exception(
+          e.toString()); // Lanza la excepción con el mensaje correcto
     }
   }
 
