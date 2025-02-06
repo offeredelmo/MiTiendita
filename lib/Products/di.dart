@@ -21,6 +21,7 @@ import 'package:mi_tiendita/Sales/presentation/bloc/sales/sales_bloc_bloc.dart';
 import 'package:mi_tiendita/Ticket/Data/dataSource/ticket_local_data_source.dart';
 import 'package:mi_tiendita/Ticket/Data/repository/ticket_repository_impl.dart';
 import 'package:mi_tiendita/Ticket/Domain/ticket.repository.dart';
+import 'package:mi_tiendita/Ticket/Presentation/Bloc/update_ticket_info_bloc_bloc.dart';
 import 'package:mi_tiendita/core/utils/bluethoot_service.dart';
 import 'package:mi_tiendita/expenses/data/dataSource/expense_local_datasorce.dart';
 import 'package:mi_tiendita/expenses/domain/expense_repository.dart';
@@ -90,7 +91,9 @@ Future<void> init() async {
       () => SaleLocalDatasourceImpl());
 
   // block Ticket
-  di.registerLazySingleton(() => AddInfoTicketBloc(di(), di()));
+  di.registerLazySingleton(() => AddInfoTicketBloc(di()));//este es el que obtiene la informacion osea el get 
+  di.registerLazySingleton(() => UpdateTicketInfoBlocBloc(di()));//este es el que agrega o actualiza la informacion
+
 
   //useCase
   di.registerLazySingleton(() => UpdateInfoTicketUseCase(repository: di()));

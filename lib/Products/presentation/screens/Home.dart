@@ -97,10 +97,12 @@ class _MyHomePageState extends State<MyHomePage> {
                         ? Icon(
                             Icons.print,
                             color: Colors.green,
+                            size: 33,
                           )
                         : Icon(
                             Icons.print_disabled,
                             color: Colors.red,
+                            size: 33,
                           ));
               },
             )

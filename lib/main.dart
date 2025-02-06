@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mi_tiendita/Ticket/Presentation/Bloc/update_ticket_info_bloc_bloc.dart';
 import 'package:mi_tiendita/Ticket/Presentation/Screen/Print_screen.dart';
 import 'package:mi_tiendita/Products/data/models/product_model.dart';
 import 'package:mi_tiendita/Sales/data/models/sele_model.dart';
@@ -54,15 +55,11 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (_) => GetIt.instance.get<AddInfoTicketBloc>()),
         BlocProvider(create: (_) => GetIt.instance.get<GetExpensesBloc>()),
         BlocProvider(create: (_) => GetIt.instance.get<CreateExpenseBloc>()),
-        BlocProvider(
-            create: (_) => GetIt.instance.get<DeleteExpenseByIdBloc>()),
-        BlocProvider(
-            create: (_) => GetIt.instance.get<GetTotalExpensesByMonthBloc>()),
-        BlocProvider(
-            create: (_) => GetIt.instance.get<GetProductByBarcodeBloc>()),
-        BlocProvider(
-            create: (_) =>
-                GetIt.instance.get<GetTotalProductsInSaleitemBlocBloc>())
+        BlocProvider(create: (_) => GetIt.instance.get<DeleteExpenseByIdBloc>()),
+        BlocProvider(create: (_) => GetIt.instance.get<GetTotalExpensesByMonthBloc>()),
+        BlocProvider(create: (_) => GetIt.instance.get<GetProductByBarcodeBloc>()),
+        BlocProvider(create: (_) =>GetIt.instance.get<GetTotalProductsInSaleitemBlocBloc>()),
+        BlocProvider(create: (_) => GetIt.instance.get<UpdateTicketInfoBlocBloc>())
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
