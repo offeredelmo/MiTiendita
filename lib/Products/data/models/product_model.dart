@@ -12,6 +12,8 @@ class ProductModel extends Product {
     required double price,
     required int stock,
     String? barCode,
+
+    
   }) : super(
             id: id,
             img_url: img_url,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:mi_tiendita/Ticket/Presentation/Bloc/update_ticket_info_bloc_bloc.dart';
 import 'package:mi_tiendita/Ticket/Presentation/Screen/Print_screen.dart';
 import 'package:mi_tiendita/Products/data/models/product_model.dart';
@@ -68,6 +69,16 @@ class MyApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
           useMaterial3: true,
         ),
+        // Agrega estas líneas para soporte en español
+        locale: const Locale('es', 'ES'),
+        supportedLocales: const [
+          Locale('es', 'ES'),
+        ],
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
         routes: {
           "/": (context) => const MyHomePage(),
           "/products": (context) => const Products(),

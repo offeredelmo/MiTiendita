@@ -19,6 +19,7 @@ class _ExpensesByDateScreenState extends State<ExpensesByDateScreen> {
   getExpensesToday() {
     print("getExpensesToday");
     setState(() {
+      selectedDate = null; // <-- Esto resetea el selector de fecha
       BlocProvider.of<GetExpensesBloc>(context)
           .add(GetExpensesEvent(day: DateTime.now()));
     });
@@ -60,7 +61,7 @@ class _ExpensesByDateScreenState extends State<ExpensesByDateScreen> {
                   modalAddExpense(context);
                 },
                 label: Text("Agregar un gasto"),
-                icon: Icon(Icons.add))
+                icon: const Icon(Icons.add))
           ],
         ),
         body: ExpensesByDateBody(
@@ -80,109 +81,181 @@ class _ExpensesByDateScreenState extends State<ExpensesByDateScreen> {
     return showModalBottomSheet(
       isScrollControlled: true,
       context: context,
+      backgroundColor: Colors.transparent,
       builder: (context) {
         return BlocListener<CreateExpenseBloc, CreateExpenseState>(
-            listener: (context, state) {
-              if (state is CreateExpenseSuccess) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Gasto agregado correctamente'),
-                    backgroundColor: Colors.green,
+          listener: (context, state) {
+            if (state is CreateExpenseSuccess) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Gasto agregado correctamente'),
+                  backgroundColor: Colors.green,
+                ),
+              );
+              context
+                  .read<GetTotalExpensesByMonthBloc>()
+                  .add(GetExpensesByMonthEvent(date: DateTime.now()));
+            }
+            if (state is CreateExpenseFailure) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Error al agregar el gasto'),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
+          },
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return SingleChildScrollView(
+                padding: EdgeInsets.only(
+                  bottom: MediaQuery.of(context).viewInsets.bottom,
+                ),
+                child: Container(
+                  width: constraints.maxWidth,
+                  margin:
+                      const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius:
+                        const BorderRadius.vertical(top: Radius.circular(24)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.07),
+                        blurRadius: 16,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
                   ),
-                );
-                context.read<GetTotalExpensesByMonthBloc>().add(GetExpensesByMonthEvent(date: DateTime.now()));
-              }
-              if (state is CreateExpenseFailure) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Error al agregar el gasto'),
-                    backgroundColor: Colors.red,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text(
+                        "Agregar gasto",
+                        style: TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 18),
+                      TextFormField(
+                        controller: descriptionController,
+                        focusNode: descriptionFocus,
+                        decoration: InputDecoration(
+                          labelText: "Descripción",
+                          filled: true,
+                          fillColor: Colors.white,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide:
+                                BorderSide(color: Colors.deepPurple.shade400),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide:
+                                BorderSide(color: Colors.deepPurple.shade400),
+                          ),
+                          prefixIcon: Icon(Icons.description,
+                              color: Colors.deepPurple.shade400),
+                        ),
+                        onTapOutside: (_) => descriptionFocus.unfocus(),
+                      ),
+                      const SizedBox(height: 18),
+                      TextFormField(
+                        controller: amountController,
+                        focusNode: amountFocus,
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          labelText: "Monto",
+                          filled: true,
+                          fillColor: Colors.white,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide:
+                                BorderSide(color: Colors.deepPurple.shade400),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide:
+                                BorderSide(color: Colors.deepPurple.shade400),
+                          ),
+                          prefixIcon: Icon(Icons.attach_money,
+                              color: Colors.deepPurple.shade400),
+                        ),
+                        onTapOutside: (_) => amountFocus.unfocus(),
+                      ),
+                      const SizedBox(height: 24),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.deepPurple,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12)),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                          ),
+                          icon: const Icon(Icons.add),
+                          label: const Text("Agregar gasto",
+                              style: TextStyle(fontSize: 16)),
+                          onPressed: () {
+                            BlocProvider.of<CreateExpenseBloc>(context).add(
+                                CreateExpenseEvent(
+                                    expense: ExpenseEntity(
+                                        id: 0,
+                                        amount:
+                                            double.parse(amountController.text),
+                                        description: descriptionController.text,
+                                        date: DateTime.now())));
+                            //si el dia seleccionado es igual a hoy se actualiza la lista de gastos, o null ya que no se a seleccionado fecha, se muestra por predeterminado los gastos de hoy
+                            if (selectedDate == null) {
+                              Future.delayed(const Duration(seconds: 1), () {
+                                getExpensesToday();
+                              });
+                            } else {
+                              if (selectedDate!.day == DateTime.now().day) {
+                                Future.delayed(const Duration(seconds: 1), () {
+                                  getExpensesToday();
+                                });
+                              }
+                            }
+                            //Salir del modal
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                      ),
+                    ],
                   ),
-                );
-              }
+                ),
+              );
             },
-            child: Container(
-              height: MediaQuery.of(context).size.height * 0.7,
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                children: [
-                  const Text("Agrega la descripción y el monto del gasto"),
-                  const SizedBox(height: 20),
-                  TextField(
-                    controller: descriptionController,
-                    focusNode: descriptionFocus,
-                    onTapOutside: (event) {
-                      descriptionFocus.unfocus();
-                    },
-                    decoration: const InputDecoration(
-                      labelText: "Descripción",
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  TextField(
-                    controller: amountController,
-                    focusNode: amountFocus,
-                    onTapOutside: (event) {
-                      amountFocus.unfocus();
-                    },
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      labelText: "Monto",
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  ElevatedButton(
-                      onPressed: () {
-                        BlocProvider.of<CreateExpenseBloc>(context).add(
-                            CreateExpenseEvent(
-                                expense: ExpenseEntity(
-                                    id: 0,
-                                    amount: double.parse(amountController.text),
-                                    description: descriptionController.text,
-                                    date: DateTime.now())));
-                        //si el dia seleccionado es igual a hoy se actualiza la lista de gastos, o null ya que no se a seleccionado fecha, se muestra por predeterminado los gastos de hoy
-                        if (selectedDate == null) {
-                          Future.delayed(const Duration(seconds: 1), () {
-                            getExpensesToday();
-                          });
-                        } else {
-                          if (selectedDate!.day == DateTime.now().day) {
-                            Future.delayed(const Duration(seconds: 1), () {
-                              getExpensesToday();
-                            });
-                          }
-                        }
-                        //Salir del modal
-                        Navigator.of(context).pop();
-                      },
-                      child: const Text("Agregar"))
-                ],
-              ),
-            ));
+          ),
+        );
       },
     );
   }
 }
 
 class ExpensesByDateBody extends StatelessWidget {
-  ExpensesByDateBody(
-      {super.key,
-      required this.selectedDate,
-      required this.getExpensesToday,
-      required this.getExpensesYesterday,
-      required this.getExpensesByDate});
+  ExpensesByDateBody({
+    super.key,
+    required this.selectedDate,
+    required this.getExpensesToday,
+    required this.getExpensesYesterday,
+    required this.getExpensesByDate,
+  });
 
   final DateTime? selectedDate;
   final Function getExpensesToday;
   final Function getExpensesYesterday;
   final Function getExpensesByDate;
-  // Función para mostrar el DatePicker
+
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? pickedDate = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(), // Fecha inicial (actual)
-      firstDate: DateTime(2024), // Fecha mínima
-      lastDate: DateTime(2030), // Fecha máxima
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2024),
+      lastDate: DateTime(2030),
+      locale: const Locale('es', 'ES'),
     );
     if (pickedDate != null && pickedDate != selectedDate) {
       getExpensesByDate(pickedDate);
@@ -191,89 +264,129 @@ class ExpensesByDateBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Center(
-          child: Row(
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Column(
+        children: [
+          Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              ElevatedButton(
-                  onPressed: () {
-                    getExpensesToday();
-                  },
-                  child: const Text("Hoy")),
-              ElevatedButton(
-                  onPressed: () {
-                    getExpensesYesterday();
-                  },
-                  child: const Text("Ayer")),
-              ElevatedButton(
-                  onPressed: () {
-                    _selectDate(context);
-                  },
-                  child: selectedDate == null
-                      ? const Text("Seleccionar fecha")
-                      : Text(
-                          "${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}")),
+              ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.deepPurple.shade50,
+                  foregroundColor: Colors.deepPurple,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                ),
+                onPressed: () => getExpensesToday(),
+                icon: const Icon(Icons.today),
+                label: const Text("Hoy"),
+              ),
+              ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.deepPurple.shade50,
+                  foregroundColor: Colors.deepPurple,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                ),
+                onPressed: () => getExpensesYesterday(),
+                icon: const Icon(Icons.history),
+                label: const Text("Ayer"),
+              ),
+              ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.deepPurple.shade50,
+                  foregroundColor: Colors.deepPurple,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                ),
+                onPressed: () => _selectDate(context),
+                icon: const Icon(Icons.calendar_month),
+                label: selectedDate == null
+                    ? const Text("Fecha")
+                    : Text(
+                        "${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}"),
+              ),
             ],
           ),
-        ),
-        BlocBuilder<GetExpensesBloc, GetExpensesState>(
-          builder: (context, state) {
-            print("stado: ${state}");
-            if (state is GetExpensesLoading) {
-              return const CircularProgressIndicator();
-            }
-            if (state is GetExpensesSucces) {
-              return state.expenses.isEmpty
-                  ? const Text("No hay gastos")
-                  : Expanded(
-                      child: ListView.builder(
-                        itemCount: state.expenses.length,
-                        itemBuilder: (context, index) {
-                          return ListTile(
-                            title: Text(state.expenses[index].description),
-                            subtitle: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text("gasto: ${state.expenses[index].amount}"),
-                                Text(
-                                    "fecha:${state.expenses[index].date.day}/${state.expenses[index].date.month}/${state.expenses[index].date.year}"),
-                                IconButton(
-                                    onPressed: () {
-                                      BlocProvider.of<DeleteExpenseByIdBloc>(
-                                              context)
-                                          .add(DeleteExpenseByIdEvent(
-                                              id: state.expenses[index].id));
-                                      if (selectedDate == null) {
-                                        Future.delayed(
-                                            const Duration(seconds: 1), () {
-                                          getExpensesToday();
-                                        });
-                                      } else {
-                                        getExpensesByDate(selectedDate!);
-                                      }
-                                      Future.delayed(const Duration(seconds: 1),
-                                          () {
-                                        getExpensesToday();
-                                      });
-                                    },
-                                    icon: const Icon(
-                                      Icons.delete,
-                                      color: Colors.red,
-                                    ))
-                              ],
-                            ),
-                          );
-                        },
-                      ),
-                    );
-            } else {
-              return const Text("Error");
-            }
-          },
-        )
-      ],
+          const SizedBox(height: 18),
+          Expanded(
+            child: BlocBuilder<GetExpensesBloc, GetExpensesState>(
+              builder: (context, state) {
+                if (state is GetExpensesLoading) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (state is GetExpensesSucces) {
+                  if (state.expenses.isEmpty) {
+                    return const Center(
+                        child: Text("No hay gastos registrados",
+                            style: TextStyle(color: Colors.grey)));
+                  }
+                  return ListView.separated(
+                    itemCount: state.expenses.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 10),
+                    itemBuilder: (context, index) {
+                      final expense = state.expenses[index];
+                      return Card(
+                        elevation: 3,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14)),
+                        color: Colors.white,
+                        child: ListTile(
+                          leading: CircleAvatar(
+                            backgroundColor: Colors.deepPurple.shade100,
+                            child: Icon(Icons.money_off,
+                                color: Colors.deepPurple.shade700),
+                          ),
+                          title: Text(
+                            expense.description,
+                            style: const TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 16),
+                          ),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Monto: \$${expense.amount.toStringAsFixed(2)}",
+                                style: TextStyle(
+                                  color: Colors.deepPurple.shade700,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              Text(
+                                "Fecha: ${expense.date.day}/${expense.date.month}/${expense.date.year}",
+                                style: const TextStyle(
+                                    color: Colors.grey, fontSize: 13),
+                              ),
+                            ],
+                          ),
+                          trailing: IconButton(
+                            icon: const Icon(Icons.delete, color: Colors.red),
+                            onPressed: () {
+                              BlocProvider.of<DeleteExpenseByIdBloc>(context)
+                                  .add(DeleteExpenseByIdEvent(id: expense.id));
+                              if (selectedDate == null) {
+                                Future.delayed(const Duration(seconds: 1), () {
+                                  getExpensesToday();
+                                });
+                              } else {
+                                getExpensesByDate(selectedDate!);
+                              }
+                            },
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                }
+                return const Center(
+                    child: Text("Error al cargar gastos",
+                        style: TextStyle(color: Colors.red)));
+              },
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

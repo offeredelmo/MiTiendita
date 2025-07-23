@@ -70,7 +70,7 @@ class ProductsLocalDataSourceImpl implements ProductsLocalDataSource {
   Future<bool> updateProduct(Product productToUpdate) async {
     try {
       final box = await Hive.openBox<ProductDto>(_boxName);
-      final existingProductDto = await box.get(productToUpdate.id);
+      final existingProductDto =  box.get(productToUpdate.id);
 
       // Filtra los productos con el mismo nombre
       final repeatedProducts = box.values

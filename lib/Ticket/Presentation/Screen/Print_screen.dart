@@ -75,12 +75,12 @@ class _BodyPrintScreenState extends State<BodyPrintScreen> {
                   height: 5,
                 ),
                 Text(
-                    "3. Recuerda agregar el nombre de tu tienda para que se muestre en el ticket."),
+                    "3. Recuerda agregar el nombre de tu negocio para que se muestre en el ticket."),
                 SizedBox(
                   height: 5,
                 ),
                 Text(
-                    "4.Agrega la dirección de la tienda para que aparezca en el ticket."),
+                    "4.Agrega la dirección del negocio   para que aparezca en el ticket."),
                 SizedBox(
                   height: 5,
                 ),
